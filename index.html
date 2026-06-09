@@ -456,7 +456,10 @@ if(nf){nf.addEventListener('submit',async(e)=>{
   const btn=nf.querySelector('button');
   btn.disabled=true; btn.textContent='Sending\u2026';
   try{
-    const res=await fetch(nf.action,{method:'POST',body:new FormData(nf),headers:{'Accept':'application/json'}});
+    const data=Object.fromEntries(new FormData(nf).entries());
+    const res=await fetch(nf.action,{method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(data)});
     if(res.ok){
       nf.innerHTML='<p class="notify-intro" style="margin:0;font-size:18px;color:var(--white);">You\u2019re on the list. We\u2019ll be in touch the moment we lock a date.</p>';
     }else{
