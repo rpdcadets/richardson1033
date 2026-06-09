@@ -119,6 +119,9 @@ section{position:relative;z-index:2;}
 .scen .no{font-family:'Saira Condensed',sans-serif;font-weight:800;font-size:30px;color:var(--blue-br);}
 .scen h3{font-size:25px;text-transform:uppercase;margin:6px 0 10px;}
 .scen p{color:var(--mut);font-size:15px;}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px;}
+.scen .tag{display:inline-block;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.2em;
+  font-size:11px;color:var(--blue-br);border:1px solid rgba(43,92,240,.4);padding:5px 11px;border-radius:3px;margin-bottom:12px;}
 
 /* TIMELINE */
 .tl{margin-top:44px;border-left:2px solid var(--line);padding-left:0;}
@@ -211,6 +214,7 @@ footer{background:#070A10;border-top:1px solid var(--line);padding:54px 0 34px;p
   .scen-grid,.stats,.foot{grid-template-columns:1fr;}
   .bolo-steps{grid-template-columns:1fr;}
   .gear-stage{grid-template-columns:1fr;gap:36px;}
+  .opt-grid{grid-template-columns:1fr;}
   .fgrid{grid-template-columns:1fr;}
   .tl-row{grid-template-columns:96px 1fr;gap:14px;}
   .reg-box{padding:26px;}
@@ -294,7 +298,8 @@ footer{background:#070A10;border-top:1px solid var(--line);padding:54px 0 34px;p
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="eyebrow">The Priority Traffic</div>
-      <h2>Ten <span class="b">Scenarios</span></h2>
+      <h2>The <span class="b">Scenarios</span></h2>
+      <p style="color:#c2cad9;font-size:17px;margin-top:16px;max-width:620px;">Your team will compete in 10 scenarios from the list of possible scenario topics below.</p>
     </div>
     <div class="scen-grid">
       <div class="scen reveal"><div class="no">01</div><h3>Misdemeanor Traffic Stop</h3><p>A routine stop, until it isn't. Approach, contact, and control.</p></div>
@@ -307,8 +312,27 @@ footer{background:#070A10;border-top:1px solid var(--line);padding:54px 0 34px;p
       <div class="scen reveal"><div class="no">08</div><h3>Robbery</h3><p>Fast-moving call. Witnesses, suspect info, and the right response.</p></div>
       <div class="scen reveal"><div class="no">09</div><h3>DWI Investigation</h3><p>Detection, standardized field sobriety testing, and the arrest decision.</p></div>
       <div class="scen reveal"><div class="no">10</div><h3>Active Threat</h3><p>Rapid deployment under live, dynamic pressure.</p></div>
+      <div class="scen reveal"><div class="no">11</div><h3>Disturbance</h3><p>Fight, party, or unruly crowd. Separate the parties and take control.</p></div>
+      <div class="scen reveal"><div class="no">12</div><h3>Theft in Progress</h3><p>Suspect still on scene. Contact, detain, and sort the story.</p></div>
+      <div class="scen reveal"><div class="no">13</div><h3>Alarm Response</h3><p>Alarm tripped, cause unknown. Approach, check, and clear.</p></div>
+      <div class="scen reveal"><div class="no">14</div><h3>Building Search</h3><p>Systematic clearing as a team. Communicate and apprehend.</p></div>
+      <div class="scen reveal"><div class="no">15</div><h3>Officer Down / Rescue</h3><p>Downed officer. Casualty care and recovery under pressure.</p></div>
+      <div class="scen reveal"><div class="no">16</div><h3>Active Shooter</h3><p>Shots fired. Close on the threat and stop it fast.</p></div>
+      <div class="scen reveal"><div class="no">17</div><h3>Welfare Check</h3><p>Check on someone, scene unknown. Could be nothing, could be everything.</p></div>
     </div>
-    <p class="reveal" style="color:var(--mut2);font-size:14px;margin-top:22px;">Final lineup and assignments drop on the night of the event. Subject to change.</p>
+    <p class="reveal" style="font-size:14px;line-height:1.6;margin-top:22px;max-width:760px;color:#d9555f;">
+      <b style="color:#e23b47;">Safety Notice &mdash; Simunition Use.</b>
+      Select scenarios use Simunition marking rounds. Because of this, no live weapons are permitted inside any scenario zone that uses Simunitions, including those carried by advisors. Before entering a Simunition scenario zone, advisors must either stand by outside the zone or secure their firearm in their vehicle glovebox. No exceptions.
+    </p>
+
+    <div class="reveal" style="margin-top:52px;">
+      <div class="eyebrow">Optional &middot; Individual</div>
+      <h3 style="font-family:'Saira Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:30px;color:#fff;margin:10px 0 0;letter-spacing:.01em;">Individual Events</h3>
+    </div>
+    <div class="opt-grid reveal">
+      <div class="scen"><div class="tag">Optional &middot; Individual</div><h3>PT Course</h3><p>A timed physical fitness course. Compete solo for top honors.</p></div>
+      <div class="scen"><div class="tag">Optional &middot; Individual</div><h3>Shoot / Don't Shoot</h3><p>A judgment drill. Read the threat and make the right call under pressure.</p></div>
+    </div>
   </div>
 </section>
 
