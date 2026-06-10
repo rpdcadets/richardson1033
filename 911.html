@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10-33 · Ops Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@600;700&family=Barlow+Condensed:wght@500;600&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0D14;--bg2:#0E1320;--panel:#121826;--panel2:#0F1521;--line:#1E2738;--line2:#283449;
+  --blue:#0B40D0;--blue-br:#2B5CF0;--white:#F4F7FF;--mut:#9AA6BC;--mut2:#6B768C;
+  --green:#3DD17A;--green-bg:#11281C;--amber:#E0A92B;--amber-bg:#2A2110;--gray:#8C97AC;--gray-bg:#1A2030;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--white);font-family:'Barlow',sans-serif;min-height:100vh;
+  background-image:radial-gradient(120% 80% at 80% -10%,rgba(43,92,240,.10),transparent 60%);}
+#gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:50;
+  background:radial-gradient(100% 80% at 50% 0,rgba(43,92,240,.12),transparent 60%),var(--bg);}
+.gate-card{width:min(400px,92vw);text-align:center;padding:40px 34px;background:var(--panel);border:1px solid var(--line);border-radius:12px;position:relative;overflow:hidden;}
+.gate-card::before{content:"";position:absolute;left:0;top:0;right:0;height:3px;background:var(--blue);}
+.badge{font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:34px;color:var(--white);line-height:1;}
+.badge span{color:var(--blue-br);}
+.gate-sub{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.22em;font-size:12px;color:var(--mut);margin:8px 0 26px;}
+.gate-card input{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:6px;color:var(--white);font-family:'Barlow',sans-serif;font-size:16px;padding:13px 14px;text-align:center;letter-spacing:.05em;}
+.gate-card input:focus{outline:none;border-color:var(--blue-br);box-shadow:0 0 0 3px rgba(43,92,240,.2);}
+.gate-card>button{width:100%;margin-top:12px;background:var(--blue);color:#fff;border:0;border-radius:6px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-weight:600;font-size:15px;padding:13px;cursor:pointer;}
+.gate-card>button:hover{background:var(--blue-br);}
+.gate-err{color:#F0606A;font-size:13px;margin-top:12px;min-height:16px;}
+.lock-note{font-size:12px;color:var(--mut2);margin-top:18px;line-height:1.5;}
+.name-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+.name-grid button{width:100%;margin:0;background:var(--bg);border:1px solid var(--line2);color:var(--white);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-weight:600;font-size:16px;padding:16px 10px;border-radius:8px;cursor:pointer;transition:.15s;}
+.name-grid button:hover{background:var(--blue);border-color:var(--blue);}
+.name-grid button.else-btn{grid-column:1/-1;background:transparent;color:var(--mut);font-size:13px;padding:11px;letter-spacing:.14em;}
+.name-grid button.else-btn:hover{color:var(--white);background:transparent;border-color:var(--blue-br);}
+#elseWrap input{width:100%;}#elseWrap button{width:100%;margin-top:10px;background:var(--blue);color:#fff;border:0;border-radius:6px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-weight:600;font-size:15px;padding:13px;cursor:pointer;}
+
+#app{display:none;max-width:1180px;margin:0 auto;padding:0 22px 80px;}
+header.bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0 18px;border-bottom:1px solid var(--line);margin-bottom:20px;flex-wrap:wrap;}
+.brand{font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:22px;}
+.brand b{color:var(--blue-br);}
+.bar-right{display:flex;align-items:center;gap:14px;}
+.mode-tag{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:11px;padding:4px 9px;border-radius:3px;}
+.mode-live{color:var(--green);border:1px solid rgba(61,209,122,.4);}
+.mode-local{color:var(--amber);border:1px solid rgba(224,169,43,.4);}
+.who{font-size:12px;color:var(--mut);}.who b{color:var(--white);}
+.tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.tab{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-weight:600;font-size:14px;color:var(--mut);background:transparent;border:1px solid var(--line);padding:9px 16px;border-radius:6px;cursor:pointer;}
+.tab:hover{color:var(--white);border-color:var(--line2);}
+.tab.on{color:#fff;background:var(--blue);border-color:var(--blue);}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+.count{font-size:13px;color:var(--mut);}.count b{color:var(--white);}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;position:relative;transition:border-color .2s;}
+.card.editing{border-color:var(--blue-br);box-shadow:0 0 0 1px rgba(43,92,240,.4);}
+.editing-badge{position:absolute;top:-9px;right:14px;background:var(--blue);color:#fff;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:10px;padding:3px 9px;border-radius:10px;display:none;}
+.card.editing .editing-badge{display:block;}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.card-no{font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--blue-br);min-width:26px;}
+.card-name{font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:18px;text-transform:uppercase;line-height:1.12;flex:1;}
+.card-name[contenteditable]:focus{outline:none;border-bottom:1px dashed var(--line2);}
+.pill{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-weight:600;font-size:12px;border:0;border-radius:20px;padding:6px 12px;cursor:pointer;appearance:none;-webkit-appearance:none;}
+.pill.idea{background:var(--gray-bg);color:var(--gray);}.pill.prog{background:var(--amber-bg);color:var(--amber);}.pill.ready{background:var(--green-bg);color:var(--green);}
+.mini-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:14px;align-items:end;}
+.fld label{display:block;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:10px;color:var(--mut2);margin-bottom:4px;}
+.fld input,.fld select,.fld textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--white);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 9px;}
+.fld textarea{resize:vertical;min-height:46px;line-height:1.45;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--blue-br);}
+.sims-box{display:flex;align-items:center;gap:7px;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:7px 11px;height:32px;cursor:pointer;}
+.sims-box input{width:16px;height:16px;accent-color:var(--blue-br);cursor:pointer;}
+.sims-box span{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;color:var(--mut);}
+.sims-box.on{border-color:var(--blue-br);}.sims-box.on span{color:var(--white);}
+.disclose{margin-top:12px;}
+.disclose summary{list-style:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:12px;color:var(--blue-br);padding-top:4px;border-top:1px solid var(--line);display:flex;align-items:center;gap:6px;}
+.disclose summary::-webkit-details-marker{display:none;}
+.disclose summary::before{content:"+";font-size:15px;line-height:1;}
+.disclose[open] summary::before{content:"\2013";}
+.det-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.det-grid .full{grid-column:1/-1;}
+.score-block{grid-column:1/-1;border-radius:6px;padding:10px 11px;}
+.score-prop{background:rgba(43,92,240,.06);border:1px solid rgba(43,92,240,.25);}
+.score-lock{background:rgba(61,209,122,.05);border:1px solid rgba(61,209,122,.3);}
+.score-block label{margin-bottom:6px;}
+.score-lock label{color:var(--green);}
+.score-block textarea{background:var(--bg2);}
+.gp-group{margin-bottom:22px;}
+.gp-head{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:var(--blue-br);padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:8px;display:flex;justify-content:space-between;}
+.gp-head .n{color:var(--mut2);}
+.gp-row{display:grid;grid-template-columns:1fr 150px 130px;gap:10px;align-items:center;padding:7px 0;}
+.gp-row .task{font-size:14px;}
+.gp-row input,.fin input,.fin select{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--white);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 9px;}
+.gp-row input:focus,.fin input:focus,.fin select:focus{outline:none;border-color:var(--blue-br);}
+.fin-sec{margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;}
+.fin-sec h3{font-family:'Saira Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:22px;margin-bottom:4px;}
+.fin-sub{font-size:13px;color:var(--mut);margin-bottom:14px;}
+.fin{width:100%;border-collapse:collapse;}
+.fin th{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--mut2);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
+.fin td{padding:6px 6px;vertical-align:middle;}
+.fin input{width:100%;}
+.fin .num{text-align:right;}
+.fin .total{font-family:'Barlow Condensed',sans-serif;font-weight:600;color:var(--white);text-align:right;white-space:nowrap;padding-right:10px;}
+.fin tr.grand td{border-top:2px solid var(--line2);padding-top:12px;font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:18px;color:var(--green);}
+.fin tr.grand .lbl{text-transform:uppercase;letter-spacing:.1em;}
+.add-btn{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:600;font-size:13px;color:var(--blue-br);background:transparent;border:1px solid rgba(43,92,240,.45);padding:8px 14px;border-radius:6px;cursor:pointer;margin-top:14px;}
+.add-btn:hover{background:rgba(43,92,240,.12);}
+.col-item{width:30%;}.col-qty{width:80px;}.col-cost{width:110px;}.col-total{width:110px;}.col-vendor{width:24%;}.col-status{width:120px;}.col-x{width:28px;}
+.rm{background:transparent;border:0;color:var(--mut2);cursor:pointer;font-size:16px;line-height:1;}
+.rm:hover{color:#F0606A;}
+.note{margin-top:30px;padding:16px 18px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;font-size:13.5px;color:var(--mut);line-height:1.6;}
+.note b{color:var(--white);}
+@media(max-width:760px){.grid,.det-grid{grid-template-columns:1fr;}.gp-row{grid-template-columns:1fr;gap:6px;}.mini-row{grid-template-columns:1fr 1fr;}.fin th.col-vendor,.fin td.col-vendor{display:none;}}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card" id="passCard">
+    <div class="badge">10<span>-</span>33</div>
+    <div class="gate-sub">Ops Board · Planning Team</div>
+    <input id="pw" type="password" placeholder="Enter passcode" autocomplete="off">
+    <button id="enterBtn">Unlock</button>
+    <div class="gate-err" id="err"></div>
+    <div class="lock-note">Encrypted. Content only decrypts with the team passcode, which is never stored in this page.</div>
+  </div>
+  <div class="gate-card" id="nameCard" style="display:none;">
+    <div class="badge">WHO'S <span>EDITING?</span></div>
+    <div class="gate-sub">Tap your name</div>
+    <div class="name-grid" id="nameGrid"></div>
+    <div id="elseWrap" style="display:none;margin-top:6px;">
+      <input id="elseName" type="text" placeholder="Type your name" autocomplete="off">
+      <button id="elseGo">Continue</button>
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="bar">
+    <div class="brand">RICHARDSON <b>10-33</b> · OPS BOARD</div>
+    <div class="bar-right">
+      <span id="modeTag" class="mode-tag mode-local">Local preview</span>
+      <span class="who">You: <b id="whoName">—</b></span>
+    </div>
+  </header>
+  <div class="tabs">
+    <button class="tab on" data-view="scen" onclick="switchTab('scen')">Scenarios</button>
+    <button class="tab" data-view="bolo" onclick="switchTab('bolo')">BOLOs</button>
+    <button class="tab" data-view="gp" onclick="switchTab('gp')">General Planning</button>
+  </div>
+
+  <div id="view-scen">
+    <div class="toolbar">
+      <div class="count"><b id="readyN">0</b> ready &middot; <b id="progN">0</b> in progress &middot; <b id="ideaN">0</b> idea &middot; <b id="simsN">0</b> use Sims</div>
+    </div>
+    <div class="grid" id="scenGrid"></div>
+  </div>
+
+  <div id="view-bolo" style="display:none;">
+    <div class="toolbar"><div class="count">5 BOLO side missions, scattered citywide.</div></div>
+    <div class="grid" id="boloGrid"></div>
+  </div>
+
+  <div id="view-gp" style="display:none;"><div id="gpWrap"></div></div>
+
+  <div class="note" id="modeNote"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDPek3ioBTobEyB31GYkpL3CL57O5XCDpo",
+  authDomain: "richardson1033-6dbc9.firebaseapp.com",
+  databaseURL: "https://richardson1033-6dbc9-default-rtdb.firebaseio.com",
+  projectId: "richardson1033-6dbc9",
+  storageBucket: "richardson1033-6dbc9.firebasestorage.app",
+  messagingSenderId: "808383920229",
+  appId: "1:808383920229:web:4e4cd62e1d822f5701ae8c"
+};
+
+const SALT_B64="lf7JCJH2851XlH7lWbnrDQ==";
+const CHECK_B64="PUnd8KyPk1CEejrBdFqtb68OnKnKvVc39IMJ2tJ5ZlBF1iVINdZ6LxLHuZYJnFo=";
+const CHECK_PLAIN="RPD1033-PLANNING-OK";
+const ITER=150000;
+let CKEY=null, db=null, LIVE=false, me="", sid=Math.random().toString(36).slice(2,9);
+const TEAM=["Tony","Dimas","Knox","Jonathan","Talley"];
+
+const b64buf=b=>Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const bufb64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf)));
+async function deriveKey(pass){
+  const base=await crypto.subtle.importKey("raw",new TextEncoder().encode(pass),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt:b64buf(SALT_B64),iterations:ITER,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function encv(obj){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},CKEY,new TextEncoder().encode(JSON.stringify(obj)));
+  const out=new Uint8Array(12+ct.byteLength);out.set(iv);out.set(new Uint8Array(ct),12);return bufb64(out);
+}
+async function decv(b64){
+  const raw=b64buf(b64);
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:raw.slice(0,12)},CKEY,raw.slice(12));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+const esc=s=>(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+const SCEN_NAMES=["Misdemeanor Traffic Stop","Felony Traffic Stop","Suspicious Person","Vehicle Investigation (Stolen)",
+"Domestic Violence","Burglary in Progress","Disturbance in Progress","Robbery in Progress","Mental Health","Active Shooter"];
+let scenarios={},sOrder=[];
+function blankScen(no,name){return {no,name,status:"idea",sims:false,lead:"",roleplayers:"",zone:"",props:"",proposed:"",locked:"",notes:""};}
+let bolos={},bOrder=[];
+function blankBolo(no){return {no,name:"",status:"idea",descr:"",zone:"",radio:"",mission:"",staffing:""};}
+const GP={
+ "Logistics":["Lock down all scenario & BOLO locations","Secure access / permission for each site","Plan team routes and start staggering","Build advisor map / packet"],
+ "Volunteers":["Recruit role-players (per scenario)","Recruit judges / scorers","Recruit safety / weapons-check staff","Volunteer briefing before event"],
+ "Equipment":["Acquire Sim guns, rounds & PPE","Source props (weapons, scene items)","Radios / comms for staff","Vehicles for traffic & stolen-vehicle scenarios"],
+ "Safety":["Write Sim safety & weapons-check protocol","Arrange EMS / medical standby","Confirm waivers & insurance"],
+ "Awards & Scoring":["Finalize scoring rubric per scenario","Print scorecards","Confirm fastest-time tiebreaker method","Set up results / tally system"],
+};
+let tasks={},tOrder=[];
+let finance={},fOrder=[];
+function blankFin(item,vendor){return {item:item||"",qty:"",unit:"",vendor:vendor||"",status:"To Buy"};}
+
+function seedLocal(){
+  scenarios={};sOrder=[];SCEN_NAMES.forEach((n,i)=>{const id="s"+(i+1);scenarios[id]=blankScen(i+1,n);sOrder.push(id);});
+  bolos={};bOrder=[];for(let i=1;i<=5;i++){const id="b"+i;bolos[id]=blankBolo(i);bOrder.push(id);}
+  tasks={};tOrder=[];let ti=0;for(const cat in GP)GP[cat].forEach(t=>{const id="t"+(ti++);tasks[id]={cat,task:t,owner:"",status:"Not Started"};tOrder.push(id);});
+  finance={};fOrder=[];[["Trophies",""],["Medals",""],["Shirts",""]].forEach(([it,v],i)=>{const id="f"+i;finance[id]=blankFin(it,v);fOrder.push(id);});
+}
+
+function scenCard(id){
+  const s=scenarios[id];
+  const opts=[["idea","Idea"],["prog","In Progress"],["ready","Ready"]].map(([v,l])=>`<option value="${v}" ${s.status===v?'selected':''}>${l}</option>`).join('');
+  return `<div class="card" id="card-${id}" data-id="${id}">
+    <div class="editing-badge" id="eb-${id}"></div>
+    <div class="card-top">
+      <span class="card-no">${String(s.no).padStart(2,'0')}</span>
+      <div class="card-name">${esc(s.name)}</div>
+      <select class="pill ${s.status}" data-f="status">${opts}</select>
+    </div>
+    <div class="mini-row">
+      <div class="fld"><label>Lead</label><input data-f="lead" value="${esc(s.lead)}" placeholder="Name"></div>
+      <div class="fld"><label>Role-players</label><input data-f="roleplayers" value="${esc(s.roleplayers)}" placeholder="#"></div>
+      <label class="sims-box ${s.sims?'on':''}"><input type="checkbox" data-f="sims" ${s.sims?'checked':''}><span>Sims</span></label>
+    </div>
+    <details class="disclose">
+      <summary>Scenario details &amp; scoring</summary>
+      <div class="det-grid">
+        <div class="fld"><label>Location / zone <span style="color:var(--mut2)">(tentative)</span></label><textarea data-f="zone" placeholder="TBD">${esc(s.zone)}</textarea></div>
+        <div class="fld"><label>Props &amp; gear</label><textarea data-f="props">${esc(s.props)}</textarea></div>
+        <div class="fld score-block score-prop"><label>Proposed scoring &mdash; open for discussion</label><textarea data-f="proposed" placeholder="What should we score? Drop ideas here...">${esc(s.proposed)}</textarea></div>
+        <div class="fld score-block score-lock"><label>Locked scoring &mdash; decided</label><textarea data-f="locked" placeholder="Confirmed scoring criteria...">${esc(s.locked)}</textarea></div>
+        <div class="fld full"><label>Notes / open questions</label><textarea data-f="notes">${esc(s.notes)}</textarea></div>
+      </div>
+    </details>
+  </div>`;
+}
+function renderScen(){
+  const g=document.getElementById('scenGrid');const fi=rememberFocus();
+  g.innerHTML=sOrder.map(scenCard).join('');
+  sOrder.forEach(id=>wireScen(id));applyPresence();restoreFocus(fi);tally();
+}
+function wireScen(id){
+  const card=document.getElementById('card-'+id);
+  card.querySelectorAll('[data-f]').forEach(el=>{
+    const f=el.getAttribute('data-f');
+    const handler=()=>{
+      if(f==='sims'){scenarios[id].sims=el.checked;el.closest('.sims-box').classList.toggle('on',el.checked);tally();}
+      else{scenarios[id][f]=el.value;if(f==='status'){el.className='pill '+el.value;tally();}}
+      pushScen(id);
+    };
+    el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',handler);
+    el.addEventListener('focus',()=>setEditing(id,true));
+    el.addEventListener('blur',()=>setEditing(id,false));
+  });
+}
+function tally(){const c={idea:0,prog:0,ready:0};let sims=0;sOrder.forEach(id=>{c[scenarios[id].status]++;if(scenarios[id].sims)sims++;});
+  readyN.textContent=c.ready;progN.textContent=c.prog;ideaN.textContent=c.idea;simsN.textContent=sims;}
+
+function boloCard(id){
+  const x=bolos[id];
+  const opts=[["idea","Idea"],["prog","In Progress"],["ready","Ready"]].map(([v,l])=>`<option value="${v}" ${x.status===v?'selected':''}>${l}</option>`).join('');
+  const nm=esc(x.name)||'<span style="color:var(--mut2)">Untitled BOLO</span>';
+  return `<div class="card" id="card-${id}" data-id="${id}">
+    <div class="editing-badge" id="eb-${id}"></div>
+    <div class="card-top">
+      <span class="card-no">B${x.no}</span>
+      <div class="card-name" contenteditable spellcheck="false" data-f="name">${nm}</div>
+      <select class="pill ${x.status}" data-f="status">${opts}</select>
+    </div>
+    <div class="det-grid" style="margin-top:14px;">
+      <div class="fld full"><label>What to look for (subject / vehicle / plate)</label><textarea data-f="descr" placeholder="Description teams must spot...">${esc(x.descr)}</textarea></div>
+      <div class="fld"><label>Location / zone <span style="color:var(--mut2)">(tentative)</span></label><textarea data-f="zone" placeholder="TBD">${esc(x.zone)}</textarea></div>
+      <div class="fld"><label>Staffing (role-player / prop)</label><textarea data-f="staffing">${esc(x.staffing)}</textarea></div>
+      <div class="fld full"><label>Radio traffic that tips teams off</label><textarea data-f="radio">${esc(x.radio)}</textarea></div>
+      <div class="fld full"><label>Side mission that unlocks</label><textarea data-f="mission">${esc(x.mission)}</textarea></div>
+    </div>
+  </div>`;
+}
+function renderBolo(){
+  const g=document.getElementById('boloGrid');const fi=rememberFocus();
+  g.innerHTML=bOrder.map(boloCard).join('');
+  bOrder.forEach(id=>wireBolo(id));applyPresence();restoreFocus(fi);
+}
+function wireBolo(id){
+  const card=document.getElementById('card-'+id);
+  card.querySelectorAll('[data-f]').forEach(el=>{
+    const f=el.getAttribute('data-f');
+    const handler=()=>{const v=(el.tagName==='DIV')?el.innerText.trim():el.value;bolos[id][f]=v;if(f==='status')el.className='pill '+v;pushBolo(id);};
+    el.addEventListener(el.tagName==='SELECT'?'change':'input',handler);
+    el.addEventListener('focus',()=>setEditing(id,true));
+    el.addEventListener('blur',()=>setEditing(id,false));
+  });
+}
+
+function st2cls(s){return s==="Done"||s==="Received"?"ready":(s==="In Progress"||s==="Ordered")?"prog":"idea";}
+function money(n){n=parseFloat(n)||0;return '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+function rowTotal(id){const f=finance[id];return (parseFloat(f.qty)||0)*(parseFloat(f.unit)||0);}
+function grandTotal(){return fOrder.reduce((a,id)=>a+rowTotal(id),0);}
+
+function renderGP(){
+  let html="";const groups={};
+  tOrder.forEach(id=>{const t=tasks[id];(groups[t.cat]=groups[t.cat]||[]).push(id);});
+  for(const cat in groups){
+    html+=`<div class="gp-group"><div class="gp-head"><span>${cat}</span><span class="n">${groups[cat].length}</span></div>`;
+    groups[cat].forEach(id=>{const t=tasks[id];
+      html+=`<div class="gp-row" data-id="${id}">
+        <div class="task">${esc(t.task)}</div>
+        <input data-f="owner" value="${esc(t.owner)}" placeholder="Owner">
+        <select data-f="status" class="pill ${st2cls(t.status)}">${["Not Started","In Progress","Done"].map(o=>`<option ${t.status===o?'selected':''}>${o}</option>`).join('')}</select>
+      </div>`;});
+    html+=`</div>`;
+  }
+  html+=`<div class="fin-sec"><h3>Finance &amp; Budget</h3><div class="fin-sub">Totals update automatically. Quantity &times; unit cost = line total; the grand total sums every row.</div>
+    <table class="fin"><thead><tr>
+      <th class="col-item">Item</th><th class="col-qty num">Qty</th><th class="col-cost num">Unit Cost</th><th class="col-total num">Total</th><th class="col-vendor">Vendor / Source</th><th class="col-status">Status</th><th class="col-x"></th>
+    </tr></thead><tbody id="finBody">`;
+  fOrder.forEach(id=>{const f=finance[id];
+    html+=`<tr data-id="${id}">
+      <td class="col-item"><input data-f="item" value="${esc(f.item)}" placeholder="Item"></td>
+      <td class="col-qty"><input data-f="qty" class="num" value="${esc(f.qty)}" placeholder="0" inputmode="decimal"></td>
+      <td class="col-cost"><input data-f="unit" class="num" value="${esc(f.unit)}" placeholder="0.00" inputmode="decimal"></td>
+      <td class="total" id="rt-${id}">${money(rowTotal(id))}</td>
+      <td class="col-vendor"><input data-f="vendor" value="${esc(f.vendor)}" placeholder="Where from"></td>
+      <td class="col-status"><select data-f="status" class="pill ${st2cls(f.status)}">${["To Buy","Ordered","Received"].map(o=>`<option ${f.status===o?'selected':''}>${o}</option>`).join('')}</select></td>
+      <td class="col-x"><button class="rm" title="Remove" onclick="removeFin('${id}')">&times;</button></td>
+    </tr>`;});
+  html+=`<tr class="grand"><td class="lbl">Grand total</td><td></td><td></td><td class="total" id="grandT">${money(grandTotal())}</td><td></td><td></td><td></td></tr>`;
+  html+=`</tbody></table><button class="add-btn" onclick="addFin()">+ Add line item</button></div>`;
+
+  const w=document.getElementById('gpWrap');const fi=rememberFocus();w.innerHTML=html;
+  w.querySelectorAll('.gp-row').forEach(row=>{const id=row.getAttribute('data-id');
+    row.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');
+      el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{tasks[id][f]=el.value;if(f==='status')el.className='pill '+st2cls(el.value);pushTask(id);});});});
+  w.querySelectorAll('#finBody tr[data-id]').forEach(row=>{const id=row.getAttribute('data-id');
+    row.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');
+      el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{
+        finance[id][f]=el.value;
+        if(f==='qty'||f==='unit'){const rt=document.getElementById('rt-'+id);if(rt)rt.textContent=money(rowTotal(id));const gt=document.getElementById('grandT');if(gt)gt.textContent=money(grandTotal());}
+        if(f==='status')el.className='pill '+st2cls(el.value);
+        pushFin(id);
+      });});});
+  restoreFocus(fi);
+}
+function addFin(){const id="f"+Date.now().toString(36);finance[id]=blankFin("","");fOrder.push(id);pushFin(id);renderGP();}
+function removeFin(id){delete finance[id];fOrder=fOrder.filter(x=>x!==id);if(LIVE)db.ref('finance/'+id).remove();renderGP();}
+
+function rememberFocus(){const a=document.activeElement;if(!a||!a.closest)return null;const row=a.closest('[data-id]');if(!row)return null;
+  return {id:row.getAttribute('data-id'),f:a.getAttribute('data-f'),pos:a.selectionStart};}
+function restoreFocus(fi){if(!fi)return;const row=document.querySelector(`[data-id="${fi.id}"]`);if(!row)return;
+  const el=row.querySelector(`[data-f="${fi.f}"]`);if(!el)return;el.focus();
+  try{if(fi.pos!=null&&el.setSelectionRange)el.setSelectionRange(fi.pos,fi.pos);}catch(e){}}
+
+const editingMap={};
+function setEditing(id,on){if(!LIVE)return;db.ref('presence/'+sid).set(on?{name:me,card:id,t:Date.now()}:{name:me,card:"",t:Date.now()});}
+function applyPresence(){
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('editing'));
+  for(const id in editingMap){const card=document.getElementById('card-'+id);if(card){card.classList.add('editing');const eb=document.getElementById('eb-'+id);if(eb)eb.textContent=editingMap[id]+' editing';}}
+}
+
+async function pushScen(id){if(!LIVE)return;db.ref('scenarios/'+id).set(await encv(scenarios[id]));}
+async function pushBolo(id){if(!LIVE)return;db.ref('bolos/'+id).set(await encv(bolos[id]));}
+async function pushTask(id){if(!LIVE)return;db.ref('tasks/'+id).set(await encv(tasks[id]));}
+async function pushFin(id){if(!LIVE)return;db.ref('finance/'+id).set(await encv(finance[id]));}
+
+async function goLive(){
+  firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();LIVE=true;
+  document.getElementById('modeTag').className='mode-tag mode-live';document.getElementById('modeTag').textContent='Live · synced';
+  const snap=await db.ref('scenarios').get();
+  if(!snap.exists()){
+    seedLocal();
+    for(const id of sOrder)await db.ref('scenarios/'+id).set(await encv(scenarios[id]));
+    for(const id of bOrder)await db.ref('bolos/'+id).set(await encv(bolos[id]));
+    for(const id of tOrder)await db.ref('tasks/'+id).set(await encv(tasks[id]));
+    for(const id of fOrder)await db.ref('finance/'+id).set(await encv(finance[id]));
+  }
+  db.ref('scenarios').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
+    scenarios=d;sOrder=Object.keys(d).sort((a,b)=>(d[a].no||0)-(d[b].no||0));renderScen();});
+  db.ref('bolos').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
+    bolos=d;bOrder=Object.keys(d).sort((a,b)=>(d[a].no||0)-(d[b].no||0));renderBolo();});
+  db.ref('tasks').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
+    tasks=d;tOrder=Object.keys(d);renderGP();});
+  db.ref('finance').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
+    finance=d;fOrder=Object.keys(d);renderGP();});
+  const meRef=db.ref('presence/'+sid);
+  db.ref('.info/connected').on('value',snap=>{if(snap.val()){meRef.onDisconnect().remove();meRef.set({name:me,card:"",t:Date.now()});}});
+  db.ref('presence').on('value',s=>{const v=s.val()||{};const m={};for(const k in v){if(k!==sid&&v[k]&&v[k].card)m[v[k].card]=v[k].name||'Someone';}
+    Object.keys(editingMap).forEach(k=>delete editingMap[k]);Object.assign(editingMap,m);applyPresence();});
+}
+
+function switchTab(v){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
+  ['scen','bolo','gp'].forEach(x=>document.getElementById('view-'+x).style.display=(x===v?'block':'none'));}
+
+function showNamePicker(){
+  document.getElementById('passCard').style.display='none';
+  document.getElementById('nameGrid').innerHTML=TEAM.map(n=>`<button onclick="pickName('${n}')">${n}</button>`).join('')+`<button class="else-btn" onclick="showElse()">Someone else</button>`;
+  document.getElementById('nameCard').style.display='block';
+}
+function showElse(){document.getElementById('elseWrap').style.display='block';document.getElementById('elseName').focus();}
+function pickName(n){me=n;startBoard();}
+
+async function unlock(){
+  const pass=document.getElementById('pw').value;
+  try{
+    CKEY=await deriveKey(pass);
+    const raw=b64buf(CHECK_B64);
+    const pt=new TextDecoder().decode(await crypto.subtle.decrypt({name:"AES-GCM",iv:raw.slice(0,12)},CKEY,raw.slice(12)));
+    if(pt!==CHECK_PLAIN)throw 0;
+  }catch(e){CKEY=null;document.getElementById('err').textContent='Incorrect passcode.';return;}
+  showNamePicker();
+}
+async function startBoard(){
+  me=(me||"Planner").trim()||"Planner";
+  document.getElementById('whoName').textContent=me;
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='block';
+  const cfgReady=FIREBASE_CONFIG.apiKey!=="PASTE_API_KEY"&&typeof firebase!=="undefined";
+  if(cfgReady){
+    document.getElementById('modeNote').innerHTML='<b>Live and encrypted.</b> Everything you type syncs to your team in real time. A card someone else is editing shows their name. Data is stored encrypted; only the passcode decrypts it.';
+    try{await goLive();}
+    catch(e){document.getElementById('modeTag').className='mode-tag mode-local';document.getElementById('modeTag').textContent='Local preview';seedLocal();renderScen();renderBolo();renderGP();
+      document.getElementById('modeNote').innerHTML='<b>Couldn\'t reach Firebase.</b> Check the config and database rules. Running as a local preview for now.';}
+  }else{
+    seedLocal();renderScen();renderBolo();renderGP();
+    document.getElementById('modeNote').innerHTML='<b>Local preview.</b> Edits live only in this browser.';
+  }
+}
+document.getElementById('enterBtn').addEventListener('click',unlock);
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')unlock();});
+function elseSubmit(){const v=document.getElementById('elseName').value.trim();if(!v)return;me=v;startBoard();}
+document.getElementById('elseGo').addEventListener('click',elseSubmit);
+document.getElementById('elseName').addEventListener('keydown',e=>{if(e.key==='Enter')elseSubmit();});
+</script>
+</body>
+</html>
