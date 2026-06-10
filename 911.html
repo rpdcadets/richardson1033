@@ -277,10 +277,12 @@ function scenCard(id){
     </details>
   </div>`;
 }
+function rememberOpen(sel){const o={};document.querySelectorAll(sel+' details[open]').forEach(d=>{const c=d.closest('[data-id]');if(c)o[c.getAttribute('data-id')]=true;});return o;}
+function restoreOpen(o){for(const id in o){const c=document.getElementById('card-'+id);if(c){const d=c.querySelector('details');if(d)d.open=true;}}}
 function renderScen(){
-  const g=document.getElementById('scenGrid');const fi=rememberFocus();
+  const g=document.getElementById('scenGrid');const fi=rememberFocus();const op=rememberOpen('#scenGrid');
   g.innerHTML=sOrder.map(scenCard).join('');
-  sOrder.forEach(id=>wireScen(id));applyPresence();restoreFocus(fi);tally();
+  sOrder.forEach(id=>wireScen(id));applyPresence();restoreOpen(op);restoreFocus(fi);tally();
 }
 function wireScen(id){
   const card=document.getElementById('card-'+id);
@@ -437,11 +439,13 @@ function applyPresence(){
   for(const id in editingMap){const card=document.getElementById('card-'+id);if(card){card.classList.add('editing');const eb=document.getElementById('eb-'+id);if(eb)eb.textContent=editingMap[id]+' editing';}}
 }
 
-async function pushScen(id){if(!LIVE)return;db.ref('scenarios/'+id).set(await encv(scenarios[id]));}
-async function pushBolo(id){if(!LIVE)return;db.ref('bolos/'+id).set(await encv(bolos[id]));}
-async function pushTask(id){if(!LIVE)return;db.ref('tasks/'+id).set(await encv(tasks[id]));}
-async function pushFin(id){if(!LIVE)return;db.ref('finance/'+id).set(await encv(finance[id]));}
-async function pushIncome(id){if(!LIVE)return;db.ref('income/'+id).set(await encv(income[id]));}
+const _deb={};
+function debounce(key,fn,ms){clearTimeout(_deb[key]);_deb[key]=setTimeout(fn,ms);}
+function pushScen(id){if(!LIVE)return;debounce('s'+id,async()=>db.ref('scenarios/'+id).set(await encv(scenarios[id])),450);}
+function pushBolo(id){if(!LIVE)return;debounce('b'+id,async()=>db.ref('bolos/'+id).set(await encv(bolos[id])),450);}
+function pushTask(id){if(!LIVE)return;debounce('t'+id,async()=>db.ref('tasks/'+id).set(await encv(tasks[id])),450);}
+function pushFin(id){if(!LIVE)return;debounce('f'+id,async()=>db.ref('finance/'+id).set(await encv(finance[id])),450);}
+function pushIncome(id){if(!LIVE)return;debounce('i'+id,async()=>db.ref('income/'+id).set(await encv(income[id])),450);}
 
 async function goLive(){
   firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();LIVE=true;
