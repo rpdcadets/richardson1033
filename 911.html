@@ -98,6 +98,21 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .gp-row input:focus,.fin input:focus,.fin select:focus{outline:none;border-color:var(--blue-br);}
 .fin-sec{margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;}
 .fin-sec h3{font-family:'Saira Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:22px;margin-bottom:4px;}
+.fin-h4{font-family:'Saira Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:15px;color:var(--blue-br);letter-spacing:.06em;margin:20px 0 6px;}
+.inc-group{margin:4px 0 12px;}
+.inc-head{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--mut2);margin:10px 0 5px;}
+.inc-row{display:grid;grid-template-columns:1fr 130px 28px;gap:10px;align-items:center;padding:4px 0;}
+.inc-row input{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--white);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 9px;width:100%;}
+.inc-row input:focus{outline:none;border-color:var(--blue-br);}
+.inc-row .amt{text-align:right;}
+.add-link{background:transparent;border:0;color:var(--blue-br);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:600;cursor:pointer;padding:5px 0;}
+.add-link:hover{text-decoration:underline;}
+.fin-sum{margin-top:20px;border-top:1px solid var(--line);padding-top:14px;}
+.fin-sum .line{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:14px;color:var(--mut);}
+.fin-sum .line b{font-family:'Barlow',sans-serif;font-size:16px;color:var(--white);letter-spacing:0;}
+.fin-sum .net{margin-top:8px;border-top:2px solid var(--line2);padding-top:13px;font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.04em;color:var(--white);}
+.fin-sum .net b{font-family:'Saira Condensed',sans-serif;font-size:22px;}
+.net-pos b{color:var(--green);}.net-neg b{color:#F0606A;}
 .fin-sub{font-size:13px;color:var(--mut);margin-bottom:14px;}
 .fin{width:100%;border-collapse:collapse;}
 .fin th{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--mut2);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);}
@@ -224,6 +239,8 @@ const GP={
 let tasks={},tOrder=[];
 let finance={},fOrder=[];
 function blankFin(item,vendor){return {item:item||"",qty:"",unit:"",vendor:vendor||"",status:"To Buy"};}
+let income={},iOrder=[];
+function blankIncome(kind,name){return {kind,name:name||"",amount:""};}
 
 function seedLocal(){
   scenarios={};sOrder=[];SCEN_NAMES.forEach((n,i)=>{const id="s"+(i+1);scenarios[id]=blankScen(i+1,n);sOrder.push(id);});
@@ -321,6 +338,26 @@ function st2cls(s){return s==="Done"||s==="Received"?"ready":(s==="In Progress"|
 function money(n){n=parseFloat(n)||0;return '$'+n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
 function rowTotal(id){const f=finance[id];return (parseFloat(f.qty)||0)*(parseFloat(f.unit)||0);}
 function grandTotal(){return fOrder.reduce((a,id)=>a+rowTotal(id),0);}
+function incTotal(){return iOrder.reduce((a,id)=>a+(parseFloat(income[id].amount)||0),0);}
+function updateFinTotals(){
+  const inc=incTotal(),exp=grandTotal(),net=inc-exp;
+  const ie=document.getElementById('incomeT');if(ie)ie.textContent=money(inc);
+  const ee=document.getElementById('expenseT');if(ee)ee.textContent=money(exp);
+  const ne=document.getElementById('netT');if(ne)ne.textContent=money(net);
+  const nl=document.getElementById('netLine');if(nl){nl.classList.toggle('net-pos',net>=0);nl.classList.toggle('net-neg',net<0);}
+}
+function incGroupHTML(kind,label,ph,addLabel){
+  const ids=iOrder.filter(id=>income[id].kind===kind);
+  let h=`<div class="inc-group"><div class="inc-head">${label}</div>`;
+  ids.forEach(id=>{const x=income[id];
+    h+=`<div class="inc-row" data-id="${id}">
+      <input data-f="name" value="${esc(x.name)}" placeholder="${ph}">
+      <input data-f="amount" class="amt" value="${esc(x.amount)}" placeholder="0.00" inputmode="decimal">
+      <button class="rm" title="Remove" onclick="removeIncome('${id}')">&times;</button>
+    </div>`;});
+  h+=`<button class="add-link" onclick="addIncome('${kind}')">+ ${addLabel}</button></div>`;
+  return h;
+}
 
 function renderGP(){
   let html="";const groups={};
@@ -338,8 +375,13 @@ function renderGP(){
       </div>`;});
     html+=`</div>`;
   }
-  html+=`<div class="fin-sec"><h3>Finance &amp; Budget</h3><div class="fin-sub">Totals update automatically. Quantity &times; unit cost = line total; the grand total sums every row.</div>
-    <table class="fin"><thead><tr>
+  html+=`<div class="fin-sec"><h3>Finance &amp; Budget</h3><div class="fin-sub">Everything totals automatically. Net is money in minus money out.</div>`;
+  html+=`<div class="fin-h4">Money In</div>`;
+  html+=incGroupHTML('reg','Registrations','Post / team name','Add team');
+  html+=incGroupHTML('sponsor','Sponsorships','Sponsor name','Add sponsor');
+  html+=incGroupHTML('donation','Donations','Donor name','Add donation');
+  html+=`<div class="fin-h4">Money Out</div>`;
+  html+=`<table class="fin"><thead><tr>
       <th class="col-item">Item</th><th class="col-qty num">Qty</th><th class="col-cost num">Unit Cost</th><th class="col-total num">Total</th><th class="col-vendor">Vendor / Source</th><th class="col-status">Status</th><th class="col-x"></th>
     </tr></thead><tbody id="finBody">`;
   fOrder.forEach(id=>{const f=finance[id];
@@ -352,8 +394,13 @@ function renderGP(){
       <td class="col-status"><select data-f="status" class="pill ${st2cls(f.status)}">${["To Buy","Ordered","Received"].map(o=>`<option ${f.status===o?'selected':''}>${o}</option>`).join('')}</select></td>
       <td class="col-x"><button class="rm" title="Remove" onclick="removeFin('${id}')">&times;</button></td>
     </tr>`;});
-  html+=`<tr class="grand"><td class="lbl">Grand total</td><td></td><td></td><td class="total" id="grandT">${money(grandTotal())}</td><td></td><td></td><td></td></tr>`;
-  html+=`</tbody></table><button class="add-btn" onclick="addFin()">+ Add line item</button></div>`;
+  html+=`</tbody></table><button class="add-btn" onclick="addFin()">+ Add line item</button>`;
+  const _net=incTotal()-grandTotal();
+  html+=`<div class="fin-sum">
+      <div class="line">Total income <b id="incomeT">${money(incTotal())}</b></div>
+      <div class="line">Total expenses <b id="expenseT">${money(grandTotal())}</b></div>
+      <div class="line net ${_net>=0?'net-pos':'net-neg'}" id="netLine">Net (in &minus; out) <b id="netT">${money(_net)}</b></div>
+    </div></div>`;
 
   const w=document.getElementById('gpWrap');const fi=rememberFocus();w.innerHTML=html;
   w.querySelectorAll('.gp-row').forEach(row=>{const id=row.getAttribute('data-id');
@@ -363,14 +410,19 @@ function renderGP(){
     row.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');
       el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{
         finance[id][f]=el.value;
-        if(f==='qty'||f==='unit'){const rt=document.getElementById('rt-'+id);if(rt)rt.textContent=money(rowTotal(id));const gt=document.getElementById('grandT');if(gt)gt.textContent=money(grandTotal());}
+        if(f==='qty'||f==='unit'){const rt=document.getElementById('rt-'+id);if(rt)rt.textContent=money(rowTotal(id));updateFinTotals();}
         if(f==='status')el.className='pill '+st2cls(el.value);
         pushFin(id);
       });});});
+  w.querySelectorAll('.inc-row').forEach(row=>{const id=row.getAttribute('data-id');
+    row.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');
+      el.addEventListener('input',()=>{income[id][f]=el.value;if(f==='amount')updateFinTotals();pushIncome(id);});});});
   restoreFocus(fi);
 }
 function addFin(){const id="f"+Date.now().toString(36);finance[id]=blankFin("","");fOrder.push(id);pushFin(id);renderGP();}
 function removeFin(id){delete finance[id];fOrder=fOrder.filter(x=>x!==id);if(LIVE)db.ref('finance/'+id).remove();renderGP();}
+function addIncome(kind){const id="i"+Date.now().toString(36);income[id]=blankIncome(kind,"");iOrder.push(id);pushIncome(id);renderGP();}
+function removeIncome(id){delete income[id];iOrder=iOrder.filter(x=>x!==id);if(LIVE)db.ref('income/'+id).remove();renderGP();}
 
 function rememberFocus(){const a=document.activeElement;if(!a||!a.closest)return null;const row=a.closest('[data-id]');if(!row)return null;
   return {id:row.getAttribute('data-id'),f:a.getAttribute('data-f'),pos:a.selectionStart};}
@@ -389,6 +441,7 @@ async function pushScen(id){if(!LIVE)return;db.ref('scenarios/'+id).set(await en
 async function pushBolo(id){if(!LIVE)return;db.ref('bolos/'+id).set(await encv(bolos[id]));}
 async function pushTask(id){if(!LIVE)return;db.ref('tasks/'+id).set(await encv(tasks[id]));}
 async function pushFin(id){if(!LIVE)return;db.ref('finance/'+id).set(await encv(finance[id]));}
+async function pushIncome(id){if(!LIVE)return;db.ref('income/'+id).set(await encv(income[id]));}
 
 async function goLive(){
   firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();LIVE=true;
@@ -409,6 +462,8 @@ async function goLive(){
     tasks=d;tOrder=Object.keys(d);renderGP();});
   db.ref('finance').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
     finance=d;fOrder=Object.keys(d);renderGP();});
+  db.ref('income').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
+    income=d;iOrder=Object.keys(d);renderGP();});
   const meRef=db.ref('presence/'+sid);
   db.ref('.info/connected').on('value',snap=>{if(snap.val()){meRef.onDisconnect().remove();meRef.set({name:me,card:"",t:Date.now()});}});
   db.ref('presence').on('value',s=>{const v=s.val()||{};const m={};for(const k in v){if(k!==sid&&v[k]&&v[k].card)m[v[k].card]=v[k].name||'Someone';}
