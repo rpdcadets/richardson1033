@@ -130,7 +130,7 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .note{margin-top:30px;padding:16px 18px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;font-size:13.5px;color:var(--mut);line-height:1.6;}
 .note b{color:var(--white);}
 /* volunteers */
-.vol-head,.vol-row{display:grid;grid-template-columns:1.1fr 125px 120px 190px 70px 1.3fr 24px;gap:8px;align-items:center;}
+.vol-head,.vol-row{display:grid;grid-template-columns:1fr 115px 1.1fr 115px 175px 64px 1.1fr 24px;gap:8px;align-items:center;}
 .vol-head{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--mut2);padding:6px 0;border-bottom:1px solid var(--line);}
 .vol-row{padding:6px 0;border-bottom:1px solid var(--line);}
 .vol-row input,.vol-row select{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--white);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 9px;width:100%;}
@@ -303,7 +303,7 @@ function blankFin(item,vendor){return {item:item||"",qty:"",unit:"",vendor:vendo
 let income={},iOrder=[];
 function blankIncome(kind,name){return {kind,name:name||"",amount:""};}
 let volunteers={},vOrder=[];
-function blankVol(){return {name:"",phone:"",role:"Role-player",assign:"",briefed:false,notes:""};}
+function blankVol(){return {name:"",phone:"",email:"",role:"Role-player",assign:"",briefed:false,notes:""};}
 const VOL_ROLES=["Role-player","Judge / Scorer","Safety Officer","HQ / Check-in","Floater","Other"];
 let dispatchCfg={teams:"10",start:"19:30",slot:"55",notes:""};
 
@@ -407,12 +407,13 @@ function wireBolo(id){
 /* ---------- volunteers ---------- */
 function renderVol(){
   const w=document.getElementById('volWrap');const fi=rememberFocus();
-  let html=`<div class="vol-head"><span>Name</span><span>Phone</span><span>Role</span><span>Assigned To</span><span style="text-align:center">Briefed</span><span>Notes</span><span></span></div>`;
+  let html=`<div class="vol-head"><span>Name</span><span>Phone</span><span>Email</span><span>Role</span><span>Assigned To</span><span style="text-align:center">Briefed</span><span>Notes</span><span></span></div>`;
   const assigns=[''].concat(SCEN_NAMES.map((n,i)=>String(i+1).padStart(2,'0')+' '+n)).concat(['BOLOs','HQ / Check-in','Floater']);
   vOrder.forEach(id=>{const v=volunteers[id];
     html+=`<div class="vol-row" data-id="${id}">
       <input data-f="name" value="${esc(v.name)}" placeholder="Name">
       <input data-f="phone" value="${esc(v.phone)}" placeholder="Phone">
+      <input data-f="email" value="${esc(v.email||'')}" placeholder="Email" inputmode="email">
       <select data-f="role">${VOL_ROLES.map(r=>`<option ${v.role===r?'selected':''}>${r}</option>`).join('')}</select>
       <select data-f="assign">${assigns.map(a=>`<option value="${esc(a)}" ${v.assign===a?'selected':''}>${a||'&mdash;'}</option>`).join('')}</select>
       <label class="brf"><input type="checkbox" data-f="briefed" ${v.briefed?'checked':''}></label>
