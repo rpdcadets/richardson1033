@@ -51,15 +51,19 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .tab.on{color:#fff;background:var(--blue);border-color:var(--blue);}
 .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
 .count{font-size:13px;color:var(--mut);}.count b{color:var(--white);}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 18px 16px;position:relative;transition:border-color .2s;}
-.card.editing{border-color:var(--blue-br);box-shadow:0 0 0 1px rgba(43,92,240,.4);}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.card{background:#141A28;border:1px solid var(--line2);border-radius:10px;padding:18px 18px 16px;position:relative;transition:border-color .2s,box-shadow .2s;box-shadow:0 6px 20px rgba(0,0,0,.22);}
+.card:focus-within{border-color:var(--blue-br);box-shadow:0 0 0 1px rgba(43,92,240,.55),0 10px 30px rgba(43,92,240,.15);}
+.card.editing{border-color:var(--blue-br);box-shadow:0 0 0 1px rgba(43,92,240,.45);}
 .editing-badge{position:absolute;top:-9px;right:14px;background:var(--blue);color:#fff;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:10px;padding:3px 9px;border-radius:10px;display:none;}
 .card.editing .editing-badge{display:block;}
 .card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
 .card-no{font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:15px;color:var(--blue-br);min-width:26px;}
 .card-name{font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:18px;text-transform:uppercase;line-height:1.12;flex:1;}
 .card-name[contenteditable]:focus{outline:none;border-bottom:1px dashed var(--line2);}
+.name-input{flex:1;min-width:0;background:transparent;border:0;border-bottom:1px solid transparent;color:var(--white);font-family:'Saira Condensed',sans-serif;font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.01em;padding:0 0 2px;}
+.name-input:focus{outline:none;border-bottom:1px dashed var(--line2);}
+.name-input::placeholder{color:var(--mut2);}
 .pill{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-weight:600;font-size:12px;border:0;border-radius:20px;padding:6px 12px;cursor:pointer;appearance:none;-webkit-appearance:none;}
 .pill.idea{background:var(--gray-bg);color:var(--gray);}.pill.prog{background:var(--amber-bg);color:var(--amber);}.pill.ready{background:var(--green-bg);color:var(--green);}
 .mini-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:14px;align-items:end;}
@@ -87,8 +91,9 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .gp-group{margin-bottom:22px;}
 .gp-head{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:var(--blue-br);padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:8px;display:flex;justify-content:space-between;}
 .gp-head .n{color:var(--mut2);}
-.gp-row{display:grid;grid-template-columns:1fr 150px 130px;gap:10px;align-items:center;padding:7px 0;}
-.gp-row .task{font-size:14px;}
+.gp-row{padding:11px 0;border-bottom:1px solid var(--line);}
+.gp-row .task{font-size:14px;margin-bottom:8px;}
+.gp-fields{display:grid;grid-template-columns:180px 140px 1fr;gap:10px;}
 .gp-row input,.fin input,.fin select{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--white);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 9px;}
 .gp-row input:focus,.fin input:focus,.fin select:focus{outline:none;border-color:var(--blue-br);}
 .fin-sec{margin-top:10px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;}
@@ -109,7 +114,7 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .rm:hover{color:#F0606A;}
 .note{margin-top:30px;padding:16px 18px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;font-size:13.5px;color:var(--mut);line-height:1.6;}
 .note b{color:var(--white);}
-@media(max-width:760px){.grid,.det-grid{grid-template-columns:1fr;}.gp-row{grid-template-columns:1fr;gap:6px;}.mini-row{grid-template-columns:1fr 1fr;}.fin th.col-vendor,.fin td.col-vendor{display:none;}}
+@media(max-width:760px){.grid,.det-grid{grid-template-columns:1fr;}.gp-fields{grid-template-columns:1fr;gap:6px;}.mini-row{grid-template-columns:1fr 1fr;}.fin th.col-vendor,.fin td.col-vendor{display:none;}}
 </style>
 </head>
 <body>
@@ -206,7 +211,7 @@ const esc=s=>(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').r
 const SCEN_NAMES=["Misdemeanor Traffic Stop","Felony Traffic Stop","Suspicious Person","Vehicle Investigation (Stolen)",
 "Domestic Violence","Burglary in Progress","Disturbance in Progress","Robbery in Progress","Mental Health","Active Shooter"];
 let scenarios={},sOrder=[];
-function blankScen(no,name){return {no,name,status:"idea",sims:false,lead:"",roleplayers:"",zone:"",props:"",proposed:"",locked:"",notes:""};}
+function blankScen(no,name){return {no,name,status:"idea",sims:false,lead:"",roleplayers:"",concept:"",zone:"",props:"",proposed:"",locked:"",notes:""};}
 let bolos={},bOrder=[];
 function blankBolo(no){return {no,name:"",status:"idea",descr:"",zone:"",radio:"",mission:"",staffing:""};}
 const GP={
@@ -223,7 +228,7 @@ function blankFin(item,vendor){return {item:item||"",qty:"",unit:"",vendor:vendo
 function seedLocal(){
   scenarios={};sOrder=[];SCEN_NAMES.forEach((n,i)=>{const id="s"+(i+1);scenarios[id]=blankScen(i+1,n);sOrder.push(id);});
   bolos={};bOrder=[];for(let i=1;i<=5;i++){const id="b"+i;bolos[id]=blankBolo(i);bOrder.push(id);}
-  tasks={};tOrder=[];let ti=0;for(const cat in GP)GP[cat].forEach(t=>{const id="t"+(ti++);tasks[id]={cat,task:t,owner:"",status:"Not Started"};tOrder.push(id);});
+  tasks={};tOrder=[];let ti=0;for(const cat in GP)GP[cat].forEach(t=>{const id="t"+(ti++);tasks[id]={cat,task:t,owner:"",status:"Not Started",notes:""};tOrder.push(id);});
   finance={};fOrder=[];[["Trophies",""],["Medals",""],["Shirts",""]].forEach(([it,v],i)=>{const id="f"+i;finance[id]=blankFin(it,v);fOrder.push(id);});
 }
 
@@ -245,6 +250,7 @@ function scenCard(id){
     <details class="disclose">
       <summary>Scenario details &amp; scoring</summary>
       <div class="det-grid">
+        <div class="fld full"><label>Scenario concept &mdash; what happens</label><textarea data-f="concept" placeholder="Describe the scenario: what's the call, what unfolds, what are teams walking into? Drop ideas here...">${esc(s.concept)}</textarea></div>
         <div class="fld"><label>Location / zone <span style="color:var(--mut2)">(tentative)</span></label><textarea data-f="zone" placeholder="TBD">${esc(s.zone)}</textarea></div>
         <div class="fld"><label>Props &amp; gear</label><textarea data-f="props">${esc(s.props)}</textarea></div>
         <div class="fld score-block score-prop"><label>Proposed scoring &mdash; open for discussion</label><textarea data-f="proposed" placeholder="What should we score? Drop ideas here...">${esc(s.proposed)}</textarea></div>
@@ -279,12 +285,11 @@ function tally(){const c={idea:0,prog:0,ready:0};let sims=0;sOrder.forEach(id=>{
 function boloCard(id){
   const x=bolos[id];
   const opts=[["idea","Idea"],["prog","In Progress"],["ready","Ready"]].map(([v,l])=>`<option value="${v}" ${x.status===v?'selected':''}>${l}</option>`).join('');
-  const nm=esc(x.name)||'<span style="color:var(--mut2)">Untitled BOLO</span>';
   return `<div class="card" id="card-${id}" data-id="${id}">
     <div class="editing-badge" id="eb-${id}"></div>
     <div class="card-top">
       <span class="card-no">B${x.no}</span>
-      <div class="card-name" contenteditable spellcheck="false" data-f="name">${nm}</div>
+      <input class="name-input" data-f="name" value="${esc(x.name)}" placeholder="Untitled BOLO" spellcheck="false">
       <select class="pill ${x.status}" data-f="status">${opts}</select>
     </div>
     <div class="det-grid" style="margin-top:14px;">
@@ -305,7 +310,7 @@ function wireBolo(id){
   const card=document.getElementById('card-'+id);
   card.querySelectorAll('[data-f]').forEach(el=>{
     const f=el.getAttribute('data-f');
-    const handler=()=>{const v=(el.tagName==='DIV')?el.innerText.trim():el.value;bolos[id][f]=v;if(f==='status')el.className='pill '+v;pushBolo(id);};
+    const handler=()=>{bolos[id][f]=el.value;if(f==='status')el.className='pill '+el.value;pushBolo(id);};
     el.addEventListener(el.tagName==='SELECT'?'change':'input',handler);
     el.addEventListener('focus',()=>setEditing(id,true));
     el.addEventListener('blur',()=>setEditing(id,false));
@@ -325,8 +330,11 @@ function renderGP(){
     groups[cat].forEach(id=>{const t=tasks[id];
       html+=`<div class="gp-row" data-id="${id}">
         <div class="task">${esc(t.task)}</div>
-        <input data-f="owner" value="${esc(t.owner)}" placeholder="Owner">
-        <select data-f="status" class="pill ${st2cls(t.status)}">${["Not Started","In Progress","Done"].map(o=>`<option ${t.status===o?'selected':''}>${o}</option>`).join('')}</select>
+        <div class="gp-fields">
+          <input data-f="owner" value="${esc(t.owner)}" placeholder="Assigned person">
+          <select data-f="status" class="pill ${st2cls(t.status)}">${["Not Started","In Progress","Done"].map(o=>`<option ${t.status===o?'selected':''}>${o}</option>`).join('')}</select>
+          <input data-f="notes" value="${esc(t.notes||'')}" placeholder="Notes">
+        </div>
       </div>`;});
     html+=`</div>`;
   }
