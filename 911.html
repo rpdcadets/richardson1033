@@ -129,7 +129,38 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .rm:hover{color:#F0606A;}
 .note{margin-top:30px;padding:16px 18px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:8px;font-size:13.5px;color:var(--mut);line-height:1.6;}
 .note b{color:var(--white);}
-@media(max-width:760px){.grid,.det-grid{grid-template-columns:1fr;}.gp-fields{grid-template-columns:1fr;gap:6px;}.mini-row{grid-template-columns:1fr 1fr;}.fin th.col-vendor,.fin td.col-vendor{display:none;}}
+/* volunteers */
+.vol-head,.vol-row{display:grid;grid-template-columns:1.1fr 125px 120px 190px 70px 1.3fr 24px;gap:8px;align-items:center;}
+.vol-head{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:11px;color:var(--mut2);padding:6px 0;border-bottom:1px solid var(--line);}
+.vol-row{padding:6px 0;border-bottom:1px solid var(--line);}
+.vol-row input,.vol-row select{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--white);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 9px;width:100%;}
+.vol-row input:focus,.vol-row select:focus{outline:none;border-color:var(--blue-br);}
+.brf{display:flex;align-items:center;justify-content:center;gap:6px;}
+.brf input{width:16px;height:16px;accent-color:var(--green);cursor:pointer;}
+/* dispatch */
+.disp-cfg{display:grid;grid-template-columns:140px 140px 160px 1fr;gap:10px;margin-bottom:14px;}
+.disp-cfg .fld input{width:100%;}
+.disp-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;}
+.disp{border-collapse:collapse;min-width:100%;}
+.disp th,.disp td{padding:8px 10px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);font-size:13px;text-align:center;white-space:nowrap;}
+.disp th{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:11px;color:var(--mut2);background:var(--panel2);position:sticky;top:0;}
+.disp td.slot{font-family:'Barlow Condensed',sans-serif;color:var(--blue-br);font-weight:600;}
+.disp td.time{color:var(--mut);}
+.disp .meal td{background:rgba(224,169,43,.07);color:var(--amber);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;}
+/* backups */
+.ghost-btn{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:11px;color:var(--mut);background:transparent;border:1px solid var(--line);padding:4px 10px;border-radius:3px;cursor:pointer;}
+.ghost-btn:hover{color:var(--white);border-color:var(--line2);}
+.overlay{position:fixed;inset:0;background:rgba(5,8,14,.82);z-index:60;display:none;align-items:center;justify-content:center;}
+.overlay.show{display:flex;}
+.bk-panel{width:min(460px,92vw);max-height:80vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:24px;}
+.bk-panel h3{font-family:'Saira Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:20px;margin-bottom:4px;}
+.bk-sub{font-size:12.5px;color:var(--mut);margin-bottom:14px;line-height:1.5;}
+.bk-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+.bk-row button{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:12px;font-weight:600;color:var(--blue-br);background:transparent;border:1px solid rgba(43,92,240,.45);padding:5px 12px;border-radius:5px;cursor:pointer;}
+.bk-row button:hover{background:rgba(43,92,240,.12);}
+.bk-close{margin-top:16px;width:100%;background:var(--bg);border:1px solid var(--line2);color:var(--mut);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-size:13px;padding:10px;border-radius:6px;cursor:pointer;}
+.bk-close:hover{color:var(--white);}
+@media(max-width:760px){.grid,.det-grid{grid-template-columns:1fr;}.gp-fields{grid-template-columns:1fr;gap:6px;}.mini-row{grid-template-columns:1fr 1fr;}.fin th.col-vendor,.fin td.col-vendor{display:none;}.vol-head{display:none;}.vol-row{grid-template-columns:1fr 1fr;gap:6px;}.disp-cfg{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
 <body>
@@ -158,6 +189,7 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
   <header class="bar">
     <div class="brand">RICHARDSON <b>10-33</b> · OPS BOARD</div>
     <div class="bar-right">
+      <button class="ghost-btn" onclick="openBackups()">Backups</button>
       <span id="modeTag" class="mode-tag mode-local">Local preview</span>
       <span class="who">You: <b id="whoName">—</b></span>
     </div>
@@ -165,6 +197,8 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
   <div class="tabs">
     <button class="tab on" data-view="scen" onclick="switchTab('scen')">Scenarios</button>
     <button class="tab" data-view="bolo" onclick="switchTab('bolo')">BOLOs</button>
+    <button class="tab" data-view="disp" onclick="switchTab('disp')">Dispatch</button>
+    <button class="tab" data-view="vol" onclick="switchTab('vol')">Volunteers</button>
     <button class="tab" data-view="gp" onclick="switchTab('gp')">General Planning</button>
   </div>
 
@@ -180,9 +214,31 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
     <div class="grid" id="boloGrid"></div>
   </div>
 
+  <div id="view-disp" style="display:none;">
+    <div class="toolbar"><div class="count">Placeholder rotation. It regenerates from the numbers below; the final matrix locks once registration closes.</div></div>
+    <div id="dispWrap"></div>
+  </div>
+
+  <div id="view-vol" style="display:none;">
+    <div class="toolbar">
+      <div class="count"><b id="volN">0</b> volunteers &middot; <b id="briefN">0</b> briefed</div>
+      <button class="add-btn" onclick="addVol()">+ Add volunteer</button>
+    </div>
+    <div id="volWrap"></div>
+  </div>
+
   <div id="view-gp" style="display:none;"><div id="gpWrap"></div></div>
 
   <div class="note" id="modeNote"></div>
+</div>
+
+<div class="overlay" id="bkOverlay">
+  <div class="bk-panel">
+    <h3>Backups</h3>
+    <div class="bk-sub">Snapshots save automatically (at most one every 6 hours, newest 15 kept). Restoring saves the current board as a new backup first, so a restore is always reversible.</div>
+    <div id="bkList"></div>
+    <button class="bk-close" onclick="closeBackups()">Close</button>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -235,7 +291,7 @@ function blankScen(no,name){return {no,name,status:"idea",sims:false,lead:"",rol
 let bolos={},bOrder=[];
 function blankBolo(no){return {no,name:"",status:"idea",descr:"",zone:"",radio:"",mission:"",staffing:""};}
 const GP={
- "Logistics":["Lock down all scenario & BOLO locations","Secure access / permission for each site","Plan team routes and start staggering","Build advisor map / packet"],
+ "Logistics":["Lock down all scenario & BOLO locations","Secure access / permission for each site","Plan team routes and start staggering","Build advisor map / packet","Contact hotels to set up a room block / special event rate for traveling posts"],
  "Volunteers":["Recruit role-players (per scenario)","Recruit judges / scorers","Recruit safety / weapons-check staff","Volunteer briefing before event"],
  "Equipment":["Acquire Sim guns, rounds & PPE","Source props (weapons, scene items)","Radios / comms for staff","Vehicles for traffic & stolen-vehicle scenarios"],
  "Safety":["Write Sim safety & weapons-check protocol","Arrange EMS / medical standby","Confirm waivers & insurance"],
@@ -246,12 +302,18 @@ let finance={},fOrder=[];
 function blankFin(item,vendor){return {item:item||"",qty:"",unit:"",vendor:vendor||"",status:"To Buy"};}
 let income={},iOrder=[];
 function blankIncome(kind,name){return {kind,name:name||"",amount:""};}
+let volunteers={},vOrder=[];
+function blankVol(){return {name:"",phone:"",role:"Role-player",assign:"",briefed:false,notes:""};}
+const VOL_ROLES=["Role-player","Judge / Scorer","Safety Officer","HQ / Check-in","Floater","Other"];
+let dispatchCfg={teams:"10",start:"19:30",slot:"55",notes:""};
 
 function seedLocal(){
   scenarios={};sOrder=[];SCEN_NAMES.forEach((n,i)=>{const id="s"+(i+1);scenarios[id]=blankScen(i+1,n);sOrder.push(id);});
   bolos={};bOrder=[];for(let i=1;i<=5;i++){const id="b"+i;bolos[id]=blankBolo(i);bOrder.push(id);}
   tasks={};tOrder=[];let ti=0;for(const cat in GP)GP[cat].forEach(t=>{const id="t"+(ti++);tasks[id]={cat,task:t,owner:"",status:"Not Started",notes:""};tOrder.push(id);});
   finance={};fOrder=[];[["Trophies",""],["Medals",""],["Shirts",""]].forEach(([it,v],i)=>{const id="f"+i;finance[id]=blankFin(it,v);fOrder.push(id);});
+  volunteers={};vOrder=[];
+  dispatchCfg={teams:"10",start:"19:30",slot:"55",notes:""};
 }
 
 function scenCard(id){
@@ -340,6 +402,69 @@ function wireBolo(id){
     el.addEventListener('focus',()=>setEditing(id,true));
     el.addEventListener('blur',()=>setEditing(id,false));
   });
+}
+
+/* ---------- volunteers ---------- */
+function renderVol(){
+  const w=document.getElementById('volWrap');const fi=rememberFocus();
+  let html=`<div class="vol-head"><span>Name</span><span>Phone</span><span>Role</span><span>Assigned To</span><span style="text-align:center">Briefed</span><span>Notes</span><span></span></div>`;
+  const assigns=[''].concat(SCEN_NAMES.map((n,i)=>String(i+1).padStart(2,'0')+' '+n)).concat(['BOLOs','HQ / Check-in','Floater']);
+  vOrder.forEach(id=>{const v=volunteers[id];
+    html+=`<div class="vol-row" data-id="${id}">
+      <input data-f="name" value="${esc(v.name)}" placeholder="Name">
+      <input data-f="phone" value="${esc(v.phone)}" placeholder="Phone">
+      <select data-f="role">${VOL_ROLES.map(r=>`<option ${v.role===r?'selected':''}>${r}</option>`).join('')}</select>
+      <select data-f="assign">${assigns.map(a=>`<option value="${esc(a)}" ${v.assign===a?'selected':''}>${a||'&mdash;'}</option>`).join('')}</select>
+      <label class="brf"><input type="checkbox" data-f="briefed" ${v.briefed?'checked':''}></label>
+      <input data-f="notes" value="${esc(v.notes)}" placeholder="Notes">
+      <button class="rm" title="Remove" onclick="removeVol('${id}')">&times;</button>
+    </div>`;});
+  if(!vOrder.length)html+=`<div style="padding:18px 0;color:var(--mut2);font-size:13.5px;">No volunteers yet. Add the first one above.</div>`;
+  w.innerHTML=html;
+  w.querySelectorAll('.vol-row').forEach(row=>{const id=row.getAttribute('data-id');
+    row.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');
+      const h=()=>{volunteers[id][f]=(el.type==='checkbox')?el.checked:el.value;if(f==='briefed')volCount();authorEdit(volunteers[id],f,el);pushVol(id);};
+      el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',h);});
+    paintAuthors(row,volunteers[id]);});
+  restoreFocus(fi);volCount();
+}
+function volCount(){const n=vOrder.length;let b=0;vOrder.forEach(id=>{if(volunteers[id].briefed)b++;});
+  const vn=document.getElementById('volN');if(vn)vn.textContent=n;const bn=document.getElementById('briefN');if(bn)bn.textContent=b;}
+function addVol(){const id="v"+Date.now().toString(36);volunteers[id]=blankVol();vOrder.push(id);pushVol(id);renderVol();}
+function removeVol(id){cancelDeb('v'+id);delete volunteers[id];vOrder=vOrder.filter(x=>x!==id);if(LIVE)db.ref('volunteers/'+id).remove();renderVol();}
+
+/* ---------- dispatch (placeholder matrix) ---------- */
+function fmtTime(mins){mins=((mins%1440)+1440)%1440;const h=Math.floor(mins/60),m=mins%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');}
+function renderDispatch(){
+  const w=document.getElementById('dispWrap');const fi=rememberFocus();
+  const teams=Math.max(1,Math.min(30,parseInt(dispatchCfg.teams)||10));
+  const slotMin=Math.max(15,Math.min(120,parseInt(dispatchCfg.slot)||55));
+  const parts=(dispatchCfg.start||"19:30").split(':');
+  const t0=(parseInt(parts[0])||19)*60+(parseInt(parts[1])||30);
+  let html=`<div class="disp-cfg" data-id="cfg">
+    <div class="fld"><label>Teams</label><input data-f="teams" value="${esc(dispatchCfg.teams)}" inputmode="numeric"></div>
+    <div class="fld"><label>First call (24h)</label><input data-f="start" value="${esc(dispatchCfg.start)}" placeholder="19:30"></div>
+    <div class="fld"><label>Minutes per rotation</label><input data-f="slot" value="${esc(dispatchCfg.slot)}" inputmode="numeric"></div>
+    <div class="fld"><label>Matrix notes</label><input data-f="notes" value="${esc(dispatchCfg.notes)}" placeholder="Assumptions, exceptions, staging notes..."></div>
+  </div>`;
+  html+=`<div class="disp-wrap"><table class="disp"><thead><tr><th>Slot</th><th>Time</th>`;
+  for(let j=1;j<=teams;j++)html+=`<th>Team ${j}</th>`;
+  html+=`</tr></thead><tbody>`;
+  let mealAdded=false;
+  for(let k=1;k<=10;k++){
+    let t=t0+(k-1)*slotMin+(mealAdded?30:0);
+    if(!mealAdded && t>=1440){html+=`<tr class="meal"><td colspan="${teams+2}">00:00 &middot; Midnight meal &amp; reset (+30 min)</td></tr>`;mealAdded=true;t+=30;}
+    html+=`<tr><td class="slot">${k}</td><td class="time">${fmtTime(t)}</td>`;
+    for(let j=1;j<=teams;j++){const sc=((k-1+(j-1))%10)+1;html+=`<td>${String(sc).padStart(2,'0')}</td>`;}
+    html+=`</tr>`;
+  }
+  html+=`</tbody></table></div>
+  <div style="margin-top:10px;font-size:12.5px;color:var(--mut2);">Numbers are scenario IDs (01&ndash;10). Round-robin offset: no two teams run the same scenario in the same slot. Times are estimates and do not account for drive time between zones.</div>`;
+  w.innerHTML=html;
+  w.querySelectorAll('.disp-cfg [data-f]').forEach(el=>{const f=el.getAttribute('data-f');
+    el.addEventListener('input',()=>{dispatchCfg[f]=el.value;pushDispatch();
+      if(f!=='notes'){clearTimeout(window._dispT);window._dispT=setTimeout(renderDispatch,600);}});});
+  restoreFocus(fi);
 }
 
 function st2cls(s){return s==="Done"||s==="Received"?"ready":(s==="In Progress"||s==="Ordered")?"prog":"idea";}
@@ -431,9 +556,9 @@ function renderGP(){
   restoreFocus(fi);
 }
 function addFin(){const id="f"+Date.now().toString(36);finance[id]=blankFin("","");fOrder.push(id);pushFin(id);renderGP();}
-function removeFin(id){delete finance[id];fOrder=fOrder.filter(x=>x!==id);if(LIVE)db.ref('finance/'+id).remove();renderGP();}
+function removeFin(id){cancelDeb('f'+id);delete finance[id];fOrder=fOrder.filter(x=>x!==id);if(LIVE)db.ref('finance/'+id).remove();renderGP();}
 function addIncome(kind){const id="i"+Date.now().toString(36);income[id]=blankIncome(kind,"");iOrder.push(id);pushIncome(id);renderGP();}
-function removeIncome(id){delete income[id];iOrder=iOrder.filter(x=>x!==id);if(LIVE)db.ref('income/'+id).remove();renderGP();}
+function removeIncome(id){cancelDeb('i'+id);delete income[id];iOrder=iOrder.filter(x=>x!==id);if(LIVE)db.ref('income/'+id).remove();renderGP();}
 
 function rememberFocus(){const a=document.activeElement;if(!a||!a.closest)return null;const row=a.closest('[data-id]');if(!row)return null;
   return {id:row.getAttribute('data-id'),f:a.getAttribute('data-f'),pos:a.selectionStart};}
@@ -449,12 +574,18 @@ function applyPresence(){
 }
 
 const _deb={};
-function debounce(key,fn,ms){clearTimeout(_deb[key]);_deb[key]=setTimeout(fn,ms);}
+function debounce(key,fn,ms){if(_deb[key])clearTimeout(_deb[key].t);_deb[key]={fn,t:setTimeout(()=>{delete _deb[key];fn();},ms)};}
+function cancelDeb(key){if(_deb[key]){clearTimeout(_deb[key].t);delete _deb[key];}}
+function flushDeb(){for(const k of Object.keys(_deb)){clearTimeout(_deb[k].t);const f=_deb[k].fn;delete _deb[k];f();}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushDeb();});
+window.addEventListener('beforeunload',flushDeb);
 function pushScen(id){if(!LIVE)return;debounce('s'+id,async()=>db.ref('scenarios/'+id).set(await encv(scenarios[id])),450);}
 function pushBolo(id){if(!LIVE)return;debounce('b'+id,async()=>db.ref('bolos/'+id).set(await encv(bolos[id])),450);}
 function pushTask(id){if(!LIVE)return;debounce('t'+id,async()=>db.ref('tasks/'+id).set(await encv(tasks[id])),450);}
 function pushFin(id){if(!LIVE)return;debounce('f'+id,async()=>db.ref('finance/'+id).set(await encv(finance[id])),450);}
 function pushIncome(id){if(!LIVE)return;debounce('i'+id,async()=>db.ref('income/'+id).set(await encv(income[id])),450);}
+function pushVol(id){if(!LIVE)return;debounce('v'+id,async()=>db.ref('volunteers/'+id).set(await encv(volunteers[id])),450);}
+function pushDispatch(){if(!LIVE)return;debounce('disp',async()=>db.ref('dispatch/config').set(await encv(dispatchCfg)),450);}
 
 async function goLive(){
   firebase.initializeApp(FIREBASE_CONFIG);db=firebase.database();LIVE=true;
@@ -471,20 +602,68 @@ async function goLive(){
     scenarios=d;sOrder=Object.keys(d).sort((a,b)=>(d[a].no||0)-(d[b].no||0));renderScen();});
   db.ref('bolos').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
     bolos=d;bOrder=Object.keys(d).sort((a,b)=>(d[a].no||0)-(d[b].no||0));renderBolo();});
+  const idNum=x=>parseInt(x.slice(1),36)||0;
+  let hotelChecked=false;
   db.ref('tasks').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    tasks=d;tOrder=Object.keys(d);renderGP();});
+    tasks=d;tOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));renderGP();
+    if(!hotelChecked){hotelChecked=true;
+      const has=Object.values(d).some(t=>/hotel/i.test(t.task||''));
+      if(!has)db.ref('tasks/t100').set(await encv({cat:"Logistics",task:"Contact hotels to set up a room block / special event rate for traveling posts",owner:"",status:"Not Started",notes:""}));}});
   db.ref('finance').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    finance=d;fOrder=Object.keys(d);renderGP();});
+    finance=d;fOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));renderGP();});
   db.ref('income').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    income=d;iOrder=Object.keys(d);renderGP();});
+    income=d;iOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));renderGP();});
+  db.ref('volunteers').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
+    volunteers=d;vOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));renderVol();});
+  const dchk=await db.ref('dispatch/config').get();
+  if(!dchk.exists())await db.ref('dispatch/config').set(await encv(dispatchCfg));
+  db.ref('dispatch/config').on('value',async s=>{if(s.exists()){try{dispatchCfg=await decv(s.val());}catch(e){}}renderDispatch();});
   const meRef=db.ref('presence/'+sid);
   db.ref('.info/connected').on('value',snap=>{if(snap.val()){meRef.onDisconnect().remove();meRef.set({name:me,card:"",t:Date.now()});}});
   db.ref('presence').on('value',s=>{const v=s.val()||{};const m={};for(const k in v){if(k!==sid&&v[k]&&v[k].card)m[v[k].card]=v[k].name||'Someone';}
     Object.keys(editingMap).forEach(k=>delete editingMap[k]);Object.assign(editingMap,m);applyPresence();});
+  ensureBackup();
+}
+
+/* ---------- automatic backups ---------- */
+const BK_NODES=['scenarios','bolos','tasks','finance','income','volunteers','dispatch'];
+async function rawBoard(){const out={};for(const n of BK_NODES){const s=await db.ref(n).get();if(s.exists())out[n]=s.val();}return out;}
+async function writeSnapshot(){const data=await rawBoard();await db.ref('backups/'+Date.now()).set(data);}
+async function pruneBackups(){try{const s=await db.ref('backups').get();if(!s.exists())return;const keys=[];s.forEach(c=>{keys.push(c.key);});keys.sort();
+  while(keys.length>15){const k=keys.shift();await db.ref('backups/'+k).remove();}}catch(e){}}
+async function ensureBackup(){try{
+  const last=await db.ref('backups').orderByKey().limitToLast(1).get();
+  let lastTs=0;if(last.exists())last.forEach(c=>{lastTs=parseInt(c.key)||0;});
+  if(Date.now()-lastTs<6*3600*1000)return;
+  await writeSnapshot();await pruneBackups();
+}catch(e){}}
+async function openBackups(){
+  if(!LIVE){alert('Backups are available once the board is live and synced.');return;}
+  const list=document.getElementById('bkList');list.innerHTML='<div style="color:var(--mut2);font-size:13px;padding:8px 0;">Loading...</div>';
+  document.getElementById('bkOverlay').classList.add('show');
+  try{
+    const s=await db.ref('backups').get();const keys=[];if(s.exists())s.forEach(c=>{keys.push(c.key);});
+    keys.sort().reverse();
+    if(!keys.length){list.innerHTML='<div style="color:var(--mut2);font-size:13px;padding:8px 0;">No backups yet. One saves automatically each session.</div>';return;}
+    list.innerHTML=keys.map(k=>{const d=new Date(parseInt(k));
+      return `<div class="bk-row"><span>${d.toLocaleDateString()} &middot; ${d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}</span><button onclick="restoreBackup('${k}')">Restore</button></div>`;}).join('');
+  }catch(e){list.innerHTML='<div style="color:#F0606A;font-size:13px;padding:8px 0;">Could not load backups. Check the database rules include the backups node.</div>';}
+}
+function closeBackups(){document.getElementById('bkOverlay').classList.remove('show');}
+async function restoreBackup(k){
+  if(!confirm('Restore the board to this backup? The current board will be saved as a new backup first, so this is reversible.'))return;
+  try{
+    await writeSnapshot();
+    const s=await db.ref('backups/'+k).get();
+    if(!s.exists()){alert('That backup could not be found.');return;}
+    const d=s.val();
+    for(const n of BK_NODES){if(d[n]!==undefined)await db.ref(n).set(d[n]);else await db.ref(n).remove();}
+    closeBackups();
+  }catch(e){alert('Restore failed: '+(e&&e.message||e));}
 }
 
 function switchTab(v){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
-  ['scen','bolo','gp'].forEach(x=>document.getElementById('view-'+x).style.display=(x===v?'block':'none'));}
+  ['scen','bolo','disp','vol','gp'].forEach(x=>document.getElementById('view-'+x).style.display=(x===v?'block':'none'));}
 
 function showNamePicker(){
   document.getElementById('passCard').style.display='none';
@@ -513,10 +692,10 @@ async function startBoard(){
   if(cfgReady){
     document.getElementById('modeNote').innerHTML='<b>Live and encrypted.</b> Everything you type syncs to your team in real time. A card someone else is editing shows their name. Data is stored encrypted; only the passcode decrypts it.';
     try{await goLive();}
-    catch(e){document.getElementById('modeTag').className='mode-tag mode-local';document.getElementById('modeTag').textContent='Local preview';seedLocal();renderScen();renderBolo();renderGP();
+    catch(e){document.getElementById('modeTag').className='mode-tag mode-local';document.getElementById('modeTag').textContent='Local preview';seedLocal();renderScen();renderBolo();renderVol();renderDispatch();renderGP();
       document.getElementById('modeNote').innerHTML='<b>Couldn\'t reach Firebase.</b> Check the config and database rules. Running as a local preview for now.';}
   }else{
-    seedLocal();renderScen();renderBolo();renderGP();
+    seedLocal();renderScen();renderBolo();renderVol();renderDispatch();renderGP();
     document.getElementById('modeNote').innerHTML='<b>Local preview.</b> Edits live only in this browser.';
   }
 }
