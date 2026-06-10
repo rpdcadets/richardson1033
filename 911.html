@@ -31,7 +31,7 @@ body{background:var(--bg);color:var(--white);font-family:'Barlow',sans-serif;min
 .lock-note{font-size:12px;color:var(--mut2);margin-top:18px;line-height:1.5;}
 .name-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
 .name-grid button{width:100%;margin:0;background:var(--bg);border:1px solid var(--line2);color:var(--white);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-weight:600;font-size:16px;padding:16px 10px;border-radius:8px;cursor:pointer;transition:.15s;}
-.name-grid button:hover{background:var(--blue);border-color:var(--blue);}
+.name-grid button:hover{background:var(--bg2);border-color:currentColor;}
 .name-grid button.else-btn{grid-column:1/-1;background:transparent;color:var(--mut);font-size:13px;padding:11px;letter-spacing:.14em;}
 .name-grid button.else-btn:hover{color:var(--white);background:transparent;border-color:var(--blue-br);}
 #elseWrap input{width:100%;}#elseWrap button{width:100%;margin-top:10px;background:var(--blue);color:#fff;border:0;border-radius:6px;font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-weight:600;font-size:15px;padding:13px;cursor:pointer;}
@@ -222,6 +222,11 @@ async function decv(b64){
   return JSON.parse(new TextDecoder().decode(pt));
 }
 const esc=s=>(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const NAME_COLORS={Tony:"#F2555F",Dimas:"#34D399",Knox:"#FBBF24",Jonathan:"#A78BFA",Talley:"#F472B6"};
+function colorFor(n){return NAME_COLORS[n]||"#AEB9CC";}
+function styleAuthor(el,name){if(!el)return;if(name){el.style.color=colorFor(name);el.title="Typed by "+name;}else{el.style.color="";el.removeAttribute('title');}}
+function authorEdit(rec,f,el){if(f==='status'||f==='sims')return;rec._by=rec._by||{};rec._by[f]=me;styleAuthor(el,me);}
+function paintAuthors(card,rec){if(!card)return;const by=(rec&&rec._by)||{};card.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');if(by[f]&&f!=='status'&&f!=='sims')styleAuthor(el,by[f]);});}
 
 const SCEN_NAMES=["Misdemeanor Traffic Stop","Felony Traffic Stop","Suspicious Person","Vehicle Investigation (Stolen)",
 "Domestic Violence","Burglary in Progress","Disturbance in Progress","Robbery in Progress","Mental Health","Active Shooter"];
@@ -282,7 +287,7 @@ function restoreOpen(o){for(const id in o){const c=document.getElementById('card
 function renderScen(){
   const g=document.getElementById('scenGrid');const fi=rememberFocus();const op=rememberOpen('#scenGrid');
   g.innerHTML=sOrder.map(scenCard).join('');
-  sOrder.forEach(id=>wireScen(id));applyPresence();restoreOpen(op);restoreFocus(fi);tally();
+  sOrder.forEach(id=>{wireScen(id);paintAuthors(document.getElementById('card-'+id),scenarios[id]);});applyPresence();restoreOpen(op);restoreFocus(fi);tally();
 }
 function wireScen(id){
   const card=document.getElementById('card-'+id);
@@ -291,6 +296,7 @@ function wireScen(id){
     const handler=()=>{
       if(f==='sims'){scenarios[id].sims=el.checked;el.closest('.sims-box').classList.toggle('on',el.checked);tally();}
       else{scenarios[id][f]=el.value;if(f==='status'){el.className='pill '+el.value;tally();}}
+      authorEdit(scenarios[id],f,el);
       pushScen(id);
     };
     el.addEventListener(el.tagName==='SELECT'||el.type==='checkbox'?'change':'input',handler);
@@ -323,13 +329,13 @@ function boloCard(id){
 function renderBolo(){
   const g=document.getElementById('boloGrid');const fi=rememberFocus();
   g.innerHTML=bOrder.map(boloCard).join('');
-  bOrder.forEach(id=>wireBolo(id));applyPresence();restoreFocus(fi);
+  bOrder.forEach(id=>{wireBolo(id);paintAuthors(document.getElementById('card-'+id),bolos[id]);});applyPresence();restoreFocus(fi);
 }
 function wireBolo(id){
   const card=document.getElementById('card-'+id);
   card.querySelectorAll('[data-f]').forEach(el=>{
     const f=el.getAttribute('data-f');
-    const handler=()=>{bolos[id][f]=el.value;if(f==='status')el.className='pill '+el.value;pushBolo(id);};
+    const handler=()=>{bolos[id][f]=el.value;if(f==='status')el.className='pill '+el.value;authorEdit(bolos[id],f,el);pushBolo(id);};
     el.addEventListener(el.tagName==='SELECT'?'change':'input',handler);
     el.addEventListener('focus',()=>setEditing(id,true));
     el.addEventListener('blur',()=>setEditing(id,false));
@@ -407,18 +413,21 @@ function renderGP(){
   const w=document.getElementById('gpWrap');const fi=rememberFocus();w.innerHTML=html;
   w.querySelectorAll('.gp-row').forEach(row=>{const id=row.getAttribute('data-id');
     row.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');
-      el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{tasks[id][f]=el.value;if(f==='status')el.className='pill '+st2cls(el.value);pushTask(id);});});});
+      el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{tasks[id][f]=el.value;if(f==='status')el.className='pill '+st2cls(el.value);authorEdit(tasks[id],f,el);pushTask(id);});});
+    paintAuthors(row,tasks[id]);});
   w.querySelectorAll('#finBody tr[data-id]').forEach(row=>{const id=row.getAttribute('data-id');
     row.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');
       el.addEventListener(el.tagName==='SELECT'?'change':'input',()=>{
         finance[id][f]=el.value;
         if(f==='qty'||f==='unit'){const rt=document.getElementById('rt-'+id);if(rt)rt.textContent=money(rowTotal(id));updateFinTotals();}
         if(f==='status')el.className='pill '+st2cls(el.value);
-        pushFin(id);
-      });});});
+        authorEdit(finance[id],f,el);pushFin(id);
+      });});
+    paintAuthors(row,finance[id]);});
   w.querySelectorAll('.inc-row').forEach(row=>{const id=row.getAttribute('data-id');
     row.querySelectorAll('[data-f]').forEach(el=>{const f=el.getAttribute('data-f');
-      el.addEventListener('input',()=>{income[id][f]=el.value;if(f==='amount')updateFinTotals();pushIncome(id);});});});
+      el.addEventListener('input',()=>{income[id][f]=el.value;if(f==='amount')updateFinTotals();authorEdit(income[id],f,el);pushIncome(id);});});
+    paintAuthors(row,income[id]);});
   restoreFocus(fi);
 }
 function addFin(){const id="f"+Date.now().toString(36);finance[id]=blankFin("","");fOrder.push(id);pushFin(id);renderGP();}
@@ -435,8 +444,8 @@ function restoreFocus(fi){if(!fi)return;const row=document.querySelector(`[data-
 const editingMap={};
 function setEditing(id,on){if(!LIVE)return;db.ref('presence/'+sid).set(on?{name:me,card:id,t:Date.now()}:{name:me,card:"",t:Date.now()});}
 function applyPresence(){
-  document.querySelectorAll('.card').forEach(c=>c.classList.remove('editing'));
-  for(const id in editingMap){const card=document.getElementById('card-'+id);if(card){card.classList.add('editing');const eb=document.getElementById('eb-'+id);if(eb)eb.textContent=editingMap[id]+' editing';}}
+  document.querySelectorAll('.card').forEach(c=>{c.classList.remove('editing');c.style.borderColor='';c.style.boxShadow='';});
+  for(const id in editingMap){const name=editingMap[id];const card=document.getElementById('card-'+id);if(card){card.classList.add('editing');const col=colorFor(name);card.style.borderColor=col;card.style.boxShadow='0 0 0 1px '+col;const eb=document.getElementById('eb-'+id);if(eb){eb.textContent=name+' editing';eb.style.background=col;eb.style.color='#0A0D14';}}}
 }
 
 const _deb={};
@@ -479,7 +488,7 @@ function switchTab(v){document.querySelectorAll('.tab').forEach(t=>t.classList.t
 
 function showNamePicker(){
   document.getElementById('passCard').style.display='none';
-  document.getElementById('nameGrid').innerHTML=TEAM.map(n=>`<button onclick="pickName('${n}')">${n}</button>`).join('')+`<button class="else-btn" onclick="showElse()">Someone else</button>`;
+  document.getElementById('nameGrid').innerHTML=TEAM.map(n=>`<button onclick="pickName('${n}')" style="color:${colorFor(n)};border-color:${colorFor(n)}66;">${n}</button>`).join('')+`<button class="else-btn" onclick="showElse()">Someone else</button>`;
   document.getElementById('nameCard').style.display='block';
 }
 function showElse(){document.getElementById('elseWrap').style.display='block';document.getElementById('elseName').focus();}
@@ -497,7 +506,7 @@ async function unlock(){
 }
 async function startBoard(){
   me=(me||"Planner").trim()||"Planner";
-  document.getElementById('whoName').textContent=me;
+  const wn=document.getElementById('whoName');wn.textContent=me;wn.style.color=colorFor(me);
   document.getElementById('gate').style.display='none';
   document.getElementById('app').style.display='block';
   const cfgReady=FIREBASE_CONFIG.apiKey!=="PASTE_API_KEY"&&typeof firebase!=="undefined";
