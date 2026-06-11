@@ -280,8 +280,16 @@ async function decv(b64){
 const esc=s=>(s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 function autoGrow(el){el.style.height='auto';el.style.height=(el.scrollHeight+2)+'px';}
 function growAll(root){(root||document).querySelectorAll('textarea').forEach(t=>{if(t.offsetParent!==null)autoGrow(t);});}
-document.addEventListener('input',e=>{if(e.target&&e.target.tagName==='TEXTAREA')autoGrow(e.target);});
+document.addEventListener('input',e=>{window._lastType=Date.now();if(e.target&&e.target.tagName==='TEXTAREA')autoGrow(e.target);});
 document.addEventListener('toggle',e=>{if(e.target&&e.target.tagName==='DETAILS'&&e.target.open)growAll(e.target);},true);
+/* defer re-renders while someone is actively typing (mobile keyboards drop keys and reset shift state when the field is rebuilt mid-typing) */
+const _pendR={};let _flushT=null;
+function typingActive(){const a=document.activeElement;
+  return !!(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')&&a.closest&&a.closest('#app')&&(Date.now()-(window._lastType||0))<1000);}
+function schedFlush(){clearTimeout(_flushT);_flushT=setTimeout(()=>{if(typingActive()){schedFlush();return;}flushRenders();},500);}
+function flushRenders(){const fns=[];for(const k in _pendR){fns.push(_pendR[k]);delete _pendR[k];}fns.forEach(f=>{try{f();}catch(e){}});}
+function deferRender(key,fn){if(typingActive()){_pendR[key]=fn;schedFlush();}else fn();}
+document.addEventListener('focusout',()=>{setTimeout(()=>{if(!typingActive())flushRenders();},80);});
 const NAME_COLORS={Tony:"#F2555F",Dimas:"#34D399",Knox:"#FBBF24",Jonathan:"#A78BFA",Talley:"#F472B6"};
 function colorFor(n){return NAME_COLORS[n]||"#AEB9CC";}
 function styleAuthor(el,name){if(!el)return;if(name){el.style.color=colorFor(name);el.title="Typed by "+name;}else{el.style.color="";el.removeAttribute('title');}}
@@ -604,25 +612,25 @@ async function goLive(){
     for(const id of fOrder)await db.ref('finance/'+id).set(await encv(finance[id]));
   }
   db.ref('scenarios').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    scenarios=d;sOrder=Object.keys(d).sort((a,b)=>(d[a].no||0)-(d[b].no||0));renderScen();});
+    scenarios=d;sOrder=Object.keys(d).sort((a,b)=>(d[a].no||0)-(d[b].no||0));deferRender('scen',renderScen);});
   db.ref('bolos').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    bolos=d;bOrder=Object.keys(d).sort((a,b)=>(d[a].no||0)-(d[b].no||0));renderBolo();});
+    bolos=d;bOrder=Object.keys(d).sort((a,b)=>(d[a].no||0)-(d[b].no||0));deferRender('bolo',renderBolo);});
   const idNum=x=>parseInt(x.slice(1),36)||0;
   let hotelChecked=false;
   db.ref('tasks').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    tasks=d;tOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));renderGP();
+    tasks=d;tOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));deferRender('gp',renderGP);
     if(!hotelChecked){hotelChecked=true;
       const has=Object.values(d).some(t=>/hotel/i.test(t.task||''));
       if(!has)db.ref('tasks/t100').set(await encv({cat:"Logistics",task:"Contact hotels to set up a room block / special event rate for traveling posts",owner:"",status:"Not Started",notes:""}));}});
   db.ref('finance').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    finance=d;fOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));renderGP();});
+    finance=d;fOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));deferRender('gp',renderGP);});
   db.ref('income').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    income=d;iOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));renderGP();});
+    income=d;iOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));deferRender('gp',renderGP);});
   db.ref('volunteers').on('value',async s=>{const v=s.val()||{};const d={};for(const id in v){try{d[id]=await decv(v[id]);}catch(e){}}
-    volunteers=d;vOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));renderVol();});
+    volunteers=d;vOrder=Object.keys(d).sort((a,b)=>idNum(a)-idNum(b));deferRender('vol',renderVol);});
   const dchk=await db.ref('dispatch/config').get();
   if(!dchk.exists())await db.ref('dispatch/config').set(await encv(dispatchCfg));
-  db.ref('dispatch/config').on('value',async s=>{if(s.exists()){try{dispatchCfg=await decv(s.val());}catch(e){}}renderDispatch();});
+  db.ref('dispatch/config').on('value',async s=>{if(s.exists()){try{dispatchCfg=await decv(s.val());}catch(e){}}deferRender('disp',renderDispatch);});
   const meRef=db.ref('presence/'+sid);
   db.ref('.info/connected').on('value',snap=>{if(snap.val()){meRef.onDisconnect().remove();meRef.set({name:me,card:"",t:Date.now()});}});
   db.ref('presence').on('value',s=>{const v=s.val()||{};const m={};for(const k in v){if(k!==sid&&v[k]&&v[k].card)m[v[k].card]=v[k].name||'Someone';}
