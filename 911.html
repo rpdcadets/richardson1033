@@ -285,10 +285,11 @@ document.addEventListener('toggle',e=>{if(e.target&&e.target.tagName==='DETAILS'
 /* defer re-renders while someone is actively typing (mobile keyboards drop keys and reset shift state when the field is rebuilt mid-typing) */
 const _pendR={};let _flushT=null;
 function typingActive(){const a=document.activeElement;
-  return !!(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')&&a.closest&&a.closest('#app')&&(Date.now()-(window._lastType||0))<1000);}
+  return !!(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')&&a.closest&&a.closest('#app')&&(Date.now()-(window._lastType||0))<15000);}
 function schedFlush(){clearTimeout(_flushT);_flushT=setTimeout(()=>{if(typingActive()){schedFlush();return;}flushRenders();},500);}
 function flushRenders(){const fns=[];for(const k in _pendR){fns.push(_pendR[k]);delete _pendR[k];}fns.forEach(f=>{try{f();}catch(e){}});}
 function deferRender(key,fn){if(typingActive()){_pendR[key]=fn;schedFlush();}else fn();}
+document.addEventListener('focusin',e=>{if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))window._lastType=Date.now();});
 document.addEventListener('focusout',()=>{setTimeout(()=>{if(!typingActive())flushRenders();},80);});
 const NAME_COLORS={Tony:"#F2555F",Dimas:"#34D399",Knox:"#FBBF24",Jonathan:"#A78BFA",Talley:"#F472B6"};
 function colorFor(n){return NAME_COLORS[n]||"#AEB9CC";}
