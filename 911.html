@@ -677,7 +677,8 @@ async function restoreBackup(k){
 }
 
 function switchTab(v){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
-  ['scen','bolo','disp','vol','gp'].forEach(x=>document.getElementById('view-'+x).style.display=(x===v?'block':'none'));}
+  ['scen','bolo','disp','vol','gp'].forEach(x=>document.getElementById('view-'+x).style.display=(x===v?'block':'none'));
+  growAll(document.getElementById('view-'+v));}
 
 function showNamePicker(){
   document.getElementById('passCard').style.display='none';
