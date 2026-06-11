@@ -92,7 +92,9 @@ header.bar{display:flex;align-items:center;justify-content:space-between;gap:16p
 .gp-head{font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:13px;color:var(--blue-br);padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:8px;display:flex;justify-content:space-between;}
 .gp-head .n{color:var(--mut2);}
 .gp-row{padding:11px 0;border-bottom:1px solid var(--line);}
-.gp-row .task{font-size:14px;margin-bottom:8px;}
+.task-line{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.task-line input{flex:1;background:transparent;border:0;border-bottom:1px dashed transparent;color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;padding:2px 0;}
+.task-line input:focus{outline:none;border-bottom-color:var(--line2);}
 .gp-fields{display:grid;grid-template-columns:180px 140px 1fr;gap:10px;}
 .gp-row input,.fin input,.fin select{background:var(--bg);border:1px solid var(--line);border-radius:5px;color:var(--white);font-family:'Barlow',sans-serif;font-size:13px;padding:7px 9px;}
 .gp-row input:focus,.fin input:focus,.fin select:focus{outline:none;border-color:var(--blue-br);}
@@ -509,18 +511,23 @@ function incGroupHTML(kind,label,ph,addLabel){
 function renderGP(){
   let html="";const groups={};
   tOrder.forEach(id=>{const t=tasks[id];(groups[t.cat]=groups[t.cat]||[]).push(id);});
-  for(const cat in groups){
-    html+=`<div class="gp-group"><div class="gp-head"><span>${cat}</span><span class="n">${groups[cat].length}</span></div>`;
-    groups[cat].forEach(id=>{const t=tasks[id];
+  const cats=Object.keys(GP).concat(Object.keys(groups).filter(c=>!(c in GP)));
+  for(const cat of cats){
+    const ids=groups[cat]||[];
+    html+=`<div class="gp-group"><div class="gp-head"><span>${esc(cat)}</span><span class="n">${ids.length}</span></div>`;
+    ids.forEach(id=>{const t=tasks[id];
       html+=`<div class="gp-row" data-id="${id}">
-        <div class="task">${esc(t.task)}</div>
+        <div class="task-line">
+          <input data-f="task" value="${esc(t.task)}" placeholder="What needs to happen">
+          <button class="rm" title="Remove" onclick="removeTask('${id}')">&times;</button>
+        </div>
         <div class="gp-fields">
           <input data-f="owner" value="${esc(t.owner)}" placeholder="Assigned person">
           <select data-f="status" class="pill ${st2cls(t.status)}">${["Not Started","In Progress","Done"].map(o=>`<option ${t.status===o?'selected':''}>${o}</option>`).join('')}</select>
           <input data-f="notes" value="${esc(t.notes||'')}" placeholder="Notes">
         </div>
       </div>`;});
-    html+=`</div>`;
+    html+=`<button class="add-link" onclick="addTask('${esc(cat)}')">+ Add item</button></div>`;
   }
   html+=`<div class="fin-sec"><h3>Finance &amp; Budget</h3><div class="fin-sub">Everything totals automatically. Net is money in minus money out.</div>`;
   html+=`<div class="fin-h4">Money In</div>`;
@@ -570,6 +577,9 @@ function renderGP(){
   restoreFocus(fi);
 }
 function addFin(){const id="f"+Date.now().toString(36);finance[id]=blankFin("","");fOrder.push(id);pushFin(id);renderGP();}
+function addTask(cat){const id="t"+Date.now().toString(36);tasks[id]={cat,task:"",owner:"",status:"Not Started",notes:""};tOrder.push(id);pushTask(id);renderGP();
+  const el=document.querySelector(`.gp-row[data-id="${id}"] input[data-f="task"]`);if(el)el.focus();}
+function removeTask(id){cancelDeb('t'+id);delete tasks[id];tOrder=tOrder.filter(x=>x!==id);if(LIVE)db.ref('tasks/'+id).remove();renderGP();}
 function removeFin(id){cancelDeb('f'+id);delete finance[id];fOrder=fOrder.filter(x=>x!==id);if(LIVE)db.ref('finance/'+id).remove();renderGP();}
 function addIncome(kind){const id="i"+Date.now().toString(36);income[id]=blankIncome(kind,"");iOrder.push(id);pushIncome(id);renderGP();}
 function removeIncome(id){cancelDeb('i'+id);delete income[id];iOrder=iOrder.filter(x=>x!==id);if(LIVE)db.ref('income/'+id).remove();renderGP();}
